@@ -8,7 +8,14 @@ $pageTitle = 'Dessert Menu';
 require_once __DIR__ . '/../includes/header.php';
 
 // Retrieve filter query parameters safely
-$categoryId = isset($_GET['category']) && is_numeric($_GET['category']) ? (int)$_GET['category'] : 0;
+$catParam = $_GET['category'] ?? ($_GET['slug'] ?? 0);
+if (!is_numeric($catParam) && !empty($catParam)) {
+    $slugStmt = $pdo->prepare("SELECT id FROM categories WHERE slug = ? LIMIT 1");
+    $slugStmt->execute([$catParam]);
+    $categoryId = (int)$slugStmt->fetchColumn();
+} else {
+    $categoryId = (int)$catParam;
+}
 $search = trim($_GET['search'] ?? '');
 $sort = trim($_GET['sort'] ?? 'featured');
 

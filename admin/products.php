@@ -77,21 +77,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($action === 'new' || $action === '
         }
 
         if (empty($errors)) {
-            if ($action === 'new') {
-                $ins = $pdo->prepare("INSERT INTO products 
-                    (category_id, name_en, name_ja, slug, description_en, description_ja, price, image, stock, availability, is_popular, tags, created_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())");
-                $ins->execute([$categoryId, $nameEn, $nameJa, $slug, $descEn, $descJa, $price, $imageFilename, $stock, $availability, $isPopular, $tags]);
-                $productId = (int)$pdo->lastInsertId();
-                setFlash('success', "New dessert '{$nameEn}' added successfully!");
-            } else {
-                $upd = $pdo->prepare("UPDATE products SET 
-                    category_id = ?, name_en = ?, name_ja = ?, slug = ?, description_en = ?, description_ja = ?, 
-                    price = ?, image = ?, stock = ?, availability = ?, is_popular = ?, tags = ?, updated_at = NOW() 
-                    WHERE id = ?");
-                $upd->execute([$categoryId, $nameEn, $nameJa, $slug, $descEn, $descJa, $price, $imageFilename, $stock, $availability, $isPopular, $tags, $productId]);
-                setFlash('success', "Dessert '{$nameEn}' updated successfully!");
-            }
+            try {
+                if ($action === 'new') {
+                    $checkSlug = $pdo->prepare("SELECT id FROM products WHERE slug = ?");
+                    $checkSlug->execute([$slug]);
+                    if ($checkSlug->fetch()) {
+                        $slug .= '-' . time();
+                    }
+
+                    $ins = $pdo->prepare("INSERT INTO products 
+                        (category_id, name_en, name_ja, slug, description_en, description_ja, price, image, stock, availability, is_popular, tags, created_at)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())");
+                    $ins->execute([$categoryId, $nameEn, $nameJa, $slug, $descEn, $descJa, $price, $imageFilename, $stock, $availability, $isPopular, $tags]);
+                    $productId = (int)$pdo->lastInsertId();
+                    setFlash('success', "New dessert '{$nameEn}' added successfully!");
+                } else {
+                    $upd = $pdo->prepare("UPDATE products SET 
+                        category_id = ?, name_en = ?, name_ja = ?, slug = ?, description_en = ?, description_ja = ?, 
+                        price = ?, image = ?, stock = ?, availability = ?, is_popular = ?, tags = ?, updated_at = NOW() 
+                        WHERE id = ?");
+                    $upd->execute([$categoryId, $nameEn, $nameJa, $slug, $descEn, $descJa, $price, $imageFilename, $stock, $availability, $isPopular, $tags, $productId]);
+                    setFlash('success', "Dessert '{$nameEn}' updated successfully!");
+                }
 
             // Save Ingredients
             $pdo->prepare("DELETE FROM product_ingredients WHERE product_id = ?")->execute([$productId]);
@@ -153,8 +160,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($action === 'new' || $action === '
 
             header("Location: products.php");
             exit;
+        } catch (PDOException $e) {
+            $errors[] = 'Database error: ' . $e->getMessage();
         }
     }
+}
 }
 
 // Prepare Data for Edit Mode

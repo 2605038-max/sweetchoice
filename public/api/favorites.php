@@ -10,7 +10,7 @@ require_once __DIR__ . '/../../includes/db.php';
 require_once __DIR__ . '/../../includes/functions.php';
 
 $pdo = getDB();
-$productId = (int)($_GET['product_id'] ?? 0);
+$productId = (int)($_REQUEST['product_id'] ?? 0);
 $userId = $_SESSION['user_id'] ?? null;
 
 if ($productId <= 0) {
