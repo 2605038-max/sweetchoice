@@ -14,9 +14,8 @@ if (!ob_get_level()) {
 $db_host = getenv('DB_HOST') ?: '127.0.0.1';
 $db_port = getenv('DB_PORT') ?: '3306';
 $db_name = getenv('DB_NAME') ?: 'sweetchoice';
-$db_user = getenv('DB_USER') ?: 'sweetchoice';
-$db_pass = getenv('DB_PASS') !== false ? getenv('DB_PASS') : 'sweetchoice123';
-
+$db_user = 'root';
+$db_pass = 'root';
 try {
     $dsn = "mysql:host={$db_host};port={$db_port};dbname={$db_name};charset=utf8mb4";
     $options = [
