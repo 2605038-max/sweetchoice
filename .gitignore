@@ -22,3 +22,4 @@ scratch/
 
 # Local Developer Database Configuration Override
 includes/db_config.local.php
+
