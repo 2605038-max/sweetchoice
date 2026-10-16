@@ -1,0 +1,24 @@
+# Operating System Files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# Editor & IDE Directories
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Temporary & Cache Files
+*.tmp
+*.bak
+*.log
+scratch/
+
+# Local Developer Database Configuration Override
+includes/db_config.local.php

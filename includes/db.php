@@ -11,11 +11,16 @@ if (!ob_get_level()) {
     ob_start();
 }
 
-$db_host = getenv('DB_HOST') ?: '127.0.0.1';
-$db_port = getenv('DB_PORT') ?: '3306';
-$db_name = getenv('DB_NAME') ?: 'sweetchoice';
-$db_user = 'root';
-$db_pass = 'root';
+// Optional developer-specific local configuration (ignored by Git)
+if (file_exists(__DIR__ . '/db_config.local.php')) {
+    require_once __DIR__ . '/db_config.local.php';
+}
+
+$db_host = $db_host ?? (getenv('DB_HOST') ?: '127.0.0.1');
+$db_port = $db_port ?? (getenv('DB_PORT') ?: '3306');
+$db_name = $db_name ?? (getenv('DB_NAME') ?: 'sweetchoice');
+$db_user = $db_user ?? (getenv('DB_USER') ?: 'root');
+$db_pass = $db_pass ?? (getenv('DB_PASS') ?: 'root');
 try {
     $dsn = "mysql:host={$db_host};port={$db_port};dbname={$db_name};charset=utf8mb4";
     $options = [
