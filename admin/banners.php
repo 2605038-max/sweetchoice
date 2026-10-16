@@ -42,12 +42,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($action === 'new' || $action === '
 
         // Image upload handling
         $imageName = $_POST['existing_image'] ?? 'banner1.jpg';
-        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-            $file = $_FILES['image'];
-            $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-            if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp'], true)) {
-                $imageName = 'banner_' . time() . '.' . $ext;
-                move_uploaded_file($file['tmp_name'], '/workspaces/sweetchoice/uploads/banners/' . $imageName);
+        if (isset($_FILES['image']) && $_FILES['image']['error'] !== UPLOAD_ERR_NO_FILE) {
+            $uploadRes = handleImageUpload($_FILES['image'], __DIR__ . '/../uploads/banners/', 'banner_');
+            if ($uploadRes['success']) {
+                $imageName = $uploadRes['filename'];
+            } else {
+                $errors[] = $uploadRes['error'];
             }
         }
 
@@ -143,7 +143,10 @@ $allBanners = $pdo->query("SELECT * FROM banners ORDER BY sort_order ASC, id ASC
                 <label class="form-label">Hero Banner Image (stored in /uploads/banners/)</label>
                 <input type="file" name="image" class="form-control" accept="image/*">
                 <?php if ($banner['image']): ?>
-                    <div style="margin-top:6px; font-size:0.8rem;">Current: <?= e($banner['image']); ?></div>
+                    <div style="margin-top:8px; display:flex; align-items:center; gap:10px;">
+                        <img src="../uploads/banners/<?= e($banner['image']); ?>" style="width:120px; height:50px; border-radius:6px; object-fit:cover;" onerror="this.src='../assets/images/logo_banner.jpg'">
+                        <span style="font-size:0.85rem; color:var(--color-secondary-text);">Current: <?= e($banner['image']); ?></span>
+                    </div>
                 <?php endif; ?>
             </div>
 

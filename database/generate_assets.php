@@ -4,9 +4,9 @@
  * Generates beautiful, styled confection graphics for banners, categories, and products.
  */
 
-$productDir = '/workspaces/sweetchoice/uploads/products/';
-$bannerDir = '/workspaces/sweetchoice/uploads/banners/';
-$assetsImageDir = '/workspaces/sweetchoice/assets/images/';
+$productDir = dirname(__DIR__) . '/uploads/products/';
+$bannerDir = dirname(__DIR__) . '/uploads/banners/';
+$assetsImageDir = dirname(__DIR__) . '/assets/images/';
 
 @mkdir($productDir, 0777, true);
 @mkdir($bannerDir, 0777, true);

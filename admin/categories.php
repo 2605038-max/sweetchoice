@@ -51,12 +51,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($action === 'new' || $action === '
 
         // Image upload handling
         $imageName = $_POST['existing_image'] ?? 'cat_cakes.jpg';
-        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-            $file = $_FILES['image'];
-            $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-            if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp'], true)) {
-                $imageName = 'cat_' . time() . '.' . $ext;
-                move_uploaded_file($file['tmp_name'], '/workspaces/sweetchoice/uploads/products/' . $imageName);
+        if (isset($_FILES['image']) && $_FILES['image']['error'] !== UPLOAD_ERR_NO_FILE) {
+            $uploadRes = handleImageUpload($_FILES['image'], __DIR__ . '/../uploads/products/', 'cat_');
+            if ($uploadRes['success']) {
+                $imageName = $uploadRes['filename'];
+            } else {
+                $errors[] = $uploadRes['error'];
             }
         }
 
@@ -141,7 +141,10 @@ $allCategories = $pdo->query("SELECT c.*, (SELECT COUNT(*) FROM products p WHERE
                 <label class="form-label">Cover Image</label>
                 <input type="file" name="image" class="form-control" accept="image/*">
                 <?php if ($category['image']): ?>
-                    <div style="margin-top:6px; font-size:0.8rem;">Current: <?= e($category['image']); ?></div>
+                    <div style="margin-top:8px; display:flex; align-items:center; gap:10px;">
+                        <img src="../uploads/products/<?= e($category['image']); ?>" style="width:60px; height:60px; border-radius:6px; object-fit:cover;" onerror="this.src='../assets/images/logo_banner.jpg'">
+                        <span style="font-size:0.85rem; color:var(--color-secondary-text);">Current: <?= e($category['image']); ?></span>
+                    </div>
                 <?php endif; ?>
             </div>
 

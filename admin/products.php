@@ -53,26 +53,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($action === 'new' || $action === '
 
         // Handle Image Upload
         $imageFilename = $_POST['existing_image'] ?? 'prod_strawberry_shortcake.jpg';
-        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-            $file = $_FILES['image'];
-            $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-            $finfo = finfo_open(FILEINFO_MIME_TYPE);
-            $mime = finfo_file($finfo, $file['tmp_name']);
-            finfo_close($finfo);
-
-            $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-            $allowedExts = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
-
-            if (!in_array($mime, $allowedMimes, true) || !in_array($ext, $allowedExts, true)) {
-                $errors[] = 'Invalid image file. Only JPG, PNG, WEBP, or GIF are allowed.';
-            } elseif ($file['size'] > 5 * 1024 * 1024) {
-                $errors[] = 'Image exceeds 5MB size limit.';
+        if (isset($_FILES['image']) && $_FILES['image']['error'] !== UPLOAD_ERR_NO_FILE) {
+            $uploadRes = handleImageUpload($_FILES['image'], __DIR__ . '/../uploads/products/', 'prod_');
+            if ($uploadRes['success']) {
+                $imageFilename = $uploadRes['filename'];
             } else {
-                $imageFilename = 'prod_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
-                $destPath = '/workspaces/sweetchoice/uploads/products/' . $imageFilename;
-                if (!move_uploaded_file($file['tmp_name'], $destPath)) {
-                    $errors[] = 'Failed to save uploaded image.';
-                }
+                $errors[] = $uploadRes['error'];
             }
         }
 

@@ -252,3 +252,87 @@ function renderOrderStatusBadge(string $status): string {
     $label = $statusKey ? __($statusKey, $status) : $status;
     return '<span class="badge ' . $class . '">' . e($label) . '</span>';
 }
+
+/**
+ * Handle image file uploads safely across environments (Windows/MAMP, Linux, macOS)
+ *
+ * @param array $file $_FILES item
+ * @param string $targetDir Target folder path
+ * @param string $prefix File name prefix (e.g. 'prod_', 'cat_', 'banner_')
+ * @param int $maxBytes Maximum file size (default 5MB)
+ * @return array ['success' => bool, 'filename' => string|null, 'error' => string|null]
+ */
+function handleImageUpload(array $file, string $targetDir, string $prefix = 'img_', int $maxBytes = 5242880): array {
+    if (!isset($file['error']) || $file['error'] === UPLOAD_ERR_NO_FILE) {
+        return ['success' => false, 'filename' => null, 'error' => 'No file uploaded.'];
+    }
+
+    if ($file['error'] !== UPLOAD_ERR_OK) {
+        $msg = match ($file['error']) {
+            UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => 'The uploaded file exceeds the maximum allowed file size.',
+            UPLOAD_ERR_PARTIAL => 'The uploaded file was only partially uploaded.',
+            UPLOAD_ERR_NO_TMP_DIR => 'Missing a temporary folder on the server.',
+            UPLOAD_ERR_CANT_WRITE => 'Failed to write file to disk.',
+            UPLOAD_ERR_EXTENSION => 'A PHP extension stopped the file upload.',
+            default => 'Unknown file upload error (code: ' . $file['error'] . ').'
+        };
+        return ['success' => false, 'filename' => null, 'error' => $msg];
+    }
+
+    if ($file['size'] > $maxBytes) {
+        $mb = round($maxBytes / (1024 * 1024), 1);
+        return ['success' => false, 'filename' => null, 'error' => "Image exceeds {$mb}MB size limit."];
+    }
+
+    $ext = strtolower(pathinfo($file['name'] ?? '', PATHINFO_EXTENSION));
+    $allowedExts = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+    if (!in_array($ext, $allowedExts, true)) {
+        return ['success' => false, 'filename' => null, 'error' => 'Invalid image format. Allowed formats: JPG, JPEG, PNG, WEBP, GIF.'];
+    }
+
+    // Verify image authenticity safely without hard dependency on fileinfo extension
+    $isValid = false;
+    $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (function_exists('getimagesize')) {
+        $imgInfo = @getimagesize($file['tmp_name']);
+        if ($imgInfo !== false && in_array($imgInfo['mime'] ?? '', $allowedMimes, true)) {
+            $isValid = true;
+        }
+    } elseif (function_exists('finfo_open')) {
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mime = finfo_file($finfo, $file['tmp_name']);
+        finfo_close($finfo);
+        if (in_array($mime, $allowedMimes, true)) {
+            $isValid = true;
+        }
+    } elseif (function_exists('mime_content_type')) {
+        $mime = @mime_content_type($file['tmp_name']);
+        if (in_array($mime, $allowedMimes, true)) {
+            $isValid = true;
+        }
+    } else {
+        $isValid = true; // Fallback to extension check
+    }
+
+    if (!$isValid) {
+        return ['success' => false, 'filename' => null, 'error' => 'The uploaded file does not appear to be a valid image.'];
+    }
+
+    // Ensure target folder exists
+    if (!is_dir($targetDir)) {
+        if (!@mkdir($targetDir, 0777, true) && !is_dir($targetDir)) {
+            return ['success' => false, 'filename' => null, 'error' => 'Target upload directory could not be created.'];
+        }
+    }
+
+    $randomPart = bin2hex(random_bytes(4));
+    $newFilename = $prefix . time() . '_' . $randomPart . '.' . $ext;
+    $targetPath = rtrim($targetDir, '/\\') . DIRECTORY_SEPARATOR . $newFilename;
+
+    if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
+        return ['success' => false, 'filename' => null, 'error' => 'Failed to save uploaded image. Please check directory permissions.'];
+    }
+
+    return ['success' => true, 'filename' => $newFilename, 'error' => null];
+}
+
