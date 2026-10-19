@@ -4,6 +4,7 @@
  * Reusable database configuration and PDO instance provider
  */
 
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -11,16 +12,11 @@ if (!ob_get_level()) {
     ob_start();
 }
 
-// Optional developer-specific local configuration (ignored by Git)
-if (file_exists(__DIR__ . '/db_config.local.php')) {
-    require_once __DIR__ . '/db_config.local.php';
-}
-
-$db_host = $db_host ?? (getenv('DB_HOST') ?: '192.168.25.124');
-$db_port = $db_port ?? (getenv('DB_PORT') ?: '3306');
-$db_name = $db_name ?? (getenv('DB_NAME') ?: 'db_sweetchoice');
-$db_user = $db_user ?? (getenv('DB_USER') ?: 'sweetchoice');
-$db_pass = $db_pass ?? (getenv('DB_PASS') ?: 'sweet123');
+$db_host = getenv('DB_HOST') ?: '127.0.0.1';
+$db_port = getenv('DB_PORT') ?: '3306';
+$db_name = getenv('DB_NAME') ?: 'sweetchoice';
+$db_user = 'root';
+$db_pass = 'root';
 try {
     $dsn = "mysql:host={$db_host};port={$db_port};dbname={$db_name};charset=utf8mb4";
     $options = [
@@ -44,6 +40,7 @@ try {
         die("Database connection failed. Please ensure MySQL is running and database 'sweetchoice' is imported.");
     }
 }
+
 
 /**
  * Global database getter function

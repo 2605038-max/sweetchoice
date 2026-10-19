@@ -4,18 +4,14 @@
  * Create, Read, Update, Delete desserts with ingredients, allergies, customizations, stock, and secure image upload.
  */
 
-
 $adminTitle = 'Manage Desserts';
 require_once __DIR__ . '/header.php';
-
 
 $action = $_GET['action'] ?? 'list';
 $productId = isset($_GET['id']) && is_numeric($_GET['id']) ? (int)$_GET['id'] : 0;
 $categories = $pdo->query("SELECT * FROM categories WHERE is_active = 1 ORDER BY sort_order ASC, id ASC")->fetchAll();
 
-
 $errors = [];
-
 
 // Handle Product Deletion
 if ($action === 'delete' && $productId > 0) {
@@ -29,7 +25,6 @@ if ($action === 'delete' && $productId > 0) {
     header("Location: products.php");
     exit;
 }
-
 
 // Handle Product Create / Update Form POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($action === 'new' || $action === 'edit')) {
@@ -48,16 +43,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($action === 'new' || $action === '
         $tags = trim($_POST['tags'] ?? '');
         $slug = trim($_POST['slug'] ?? '');
 
-
         if (empty($slug)) {
             $slug = strtolower(preg_replace('/[^a-zA-Z0-9]+/', '-', $nameEn));
         }
 
-
         if (empty($nameEn) || empty($nameJa) || $categoryId <= 0 || $price <= 0) {
             $errors[] = 'Please fill in English Name, Japanese Name, Category, and valid JPY Price.';
         }
-
 
         // Handle Image Upload
         $imageFilename = $_POST['existing_image'] ?? 'prod_strawberry_shortcake.jpg';
@@ -70,7 +62,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($action === 'new' || $action === '
             }
         }
 
-
         if (empty($errors)) {
             try {
                 if ($action === 'new') {
@@ -79,7 +70,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($action === 'new' || $action === '
                     if ($checkSlug->fetch()) {
                         $slug .= '-' . time();
                     }
-
 
                     $ins = $pdo->prepare("INSERT INTO products 
                         (category_id, name_en, name_ja, slug, description_en, description_ja, price, image, stock, availability, is_popular, tags, created_at)
@@ -95,7 +85,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($action === 'new' || $action === '
                     $upd->execute([$categoryId, $nameEn, $nameJa, $slug, $descEn, $descJa, $price, $imageFilename, $stock, $availability, $isPopular, $tags, $productId]);
                     setFlash('success', "Dessert '{$nameEn}' updated successfully!");
                 }
-
 
             // Save Ingredients
             $pdo->prepare("DELETE FROM product_ingredients WHERE product_id = ?")->execute([$productId]);
@@ -114,7 +103,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($action === 'new' || $action === '
                 }
             }
 
-
             // Save Allergies
             $pdo->prepare("DELETE FROM product_allergies WHERE product_id = ?")->execute([$productId]);
             $rawAllergies = trim($_POST['allergies'] ?? '');
@@ -131,7 +119,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($action === 'new' || $action === '
                     }
                 }
             }
-
 
             // Save Customizations
             $pdo->prepare("DELETE FROM product_customizations WHERE product_id = ?")->execute([$productId]);
@@ -157,7 +144,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($action === 'new' || $action === '
                 }
             }
 
-
             header("Location: products.php");
             exit;
         } catch (PDOException $e) {
@@ -166,7 +152,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($action === 'new' || $action === '
     }
 }
 }
-
 
 // Prepare Data for Edit Mode
 $product = [
@@ -178,14 +163,12 @@ $ingredientsText = '';
 $allergiesText = '';
 $customizationsText = '';
 
-
 if ($action === 'edit' && $productId > 0) {
     $stmt = $pdo->prepare("SELECT * FROM products WHERE id = ?");
     $stmt->execute([$productId]);
     $p = $stmt->fetch();
     if ($p) {
         $product = $p;
-
 
         // Fetch ingredients as text lines
         $ingList = $pdo->prepare("SELECT * FROM product_ingredients WHERE product_id = ?");
@@ -196,7 +179,6 @@ if ($action === 'edit' && $productId > 0) {
         }
         $ingredientsText = implode("\n", $lines);
 
-
         // Fetch allergies as text lines
         $algList = $pdo->prepare("SELECT * FROM product_allergies WHERE product_id = ?");
         $algList->execute([$productId]);
@@ -205,7 +187,6 @@ if ($action === 'edit' && $productId > 0) {
             $lines[] = $alg['allergy_en'] . '|' . $alg['allergy_ja'];
         }
         $allergiesText = implode("\n", $lines);
-
 
         // Fetch customizations as text lines
         $cList = $pdo->prepare("SELECT * FROM product_customizations WHERE product_id = ?");
@@ -218,14 +199,12 @@ if ($action === 'edit' && $productId > 0) {
     }
 }
 
-
 // Fetch list of all products for 'list' view
 $allProducts = $pdo->query("SELECT p.*, c.name_en AS category_name 
                            FROM products p 
                            JOIN categories c ON p.category_id = c.id 
                            ORDER BY p.id DESC")->fetchAll();
 ?>
-
 
 <?php if ($action === 'new' || $action === 'edit'): ?>
     <!-- Form View -->
@@ -234,7 +213,6 @@ $allProducts = $pdo->query("SELECT p.*, c.name_en AS category_name
             <h2 style="font-size:1.4rem;"><?= $action === 'new' ? '➕ Add New Dessert' : '✏️ Edit Dessert #' . $product['id']; ?></h2>
             <a href="products.php" class="btn btn-secondary btn-sm">&larr; Back to Products</a>
         </div>
-
 
         <?php if (!empty($errors)): ?>
             <div class="alert alert-danger">
@@ -246,11 +224,9 @@ $allProducts = $pdo->query("SELECT p.*, c.name_en AS category_name
             </div>
         <?php endif; ?>
 
-
         <form action="products.php?action=<?= $action; ?>&id=<?= $productId; ?>" method="POST" enctype="multipart/form-data">
             <input type="hidden" name="csrf_token" value="<?= getCsrfToken(); ?>">
             <input type="hidden" name="existing_image" value="<?= e($product['image']); ?>">
-
 
             <div class="form-row">
                 <div class="form-group">
@@ -269,7 +245,6 @@ $allProducts = $pdo->query("SELECT p.*, c.name_en AS category_name
                 </div>
             </div>
 
-
             <div class="form-row">
                 <div class="form-group">
                     <label class="form-label">Product Name (English) *</label>
@@ -280,7 +255,6 @@ $allProducts = $pdo->query("SELECT p.*, c.name_en AS category_name
                     <input type="text" name="name_ja" class="form-control" required value="<?= e($product['name_ja']); ?>" placeholder="極上いちごのショートケーキ">
                 </div>
             </div>
-
 
             <div class="form-row">
                 <div class="form-group">
@@ -297,7 +271,6 @@ $allProducts = $pdo->query("SELECT p.*, c.name_en AS category_name
                 </div>
             </div>
 
-
             <div class="form-row">
                 <div class="form-group">
                     <label class="form-label">Description (English)</label>
@@ -309,7 +282,6 @@ $allProducts = $pdo->query("SELECT p.*, c.name_en AS category_name
                 </div>
             </div>
 
-
             <div class="form-group">
                 <label class="form-label">AI Sommelier Recommendation Tags (Comma-separated)</label>
                 <input type="text" name="tags" class="form-control" value="<?= e($product['tags']); ?>" placeholder="chocolate, fruit, creamy, sweet, happy, stressed, celebration">
@@ -317,7 +289,6 @@ $allProducts = $pdo->query("SELECT p.*, c.name_en AS category_name
                     Tags used to pair mood and taste in the AI Sommelier engine: <code>chocolate, fruit, creamy, sweet, light, comfort, celebration, romantic, energy, relaxed, cake, cookie, pudding</code>
                 </div>
             </div>
-
 
             <div class="form-row">
                 <div class="form-group">
@@ -338,9 +309,7 @@ $allProducts = $pdo->query("SELECT p.*, c.name_en AS category_name
                 </div>
             </div>
 
-
             <hr style="margin:24px 0; border:none; border-top:1px solid var(--color-border);">
-
 
             <!-- Associated Ingredients -->
             <div class="form-group">
@@ -348,13 +317,11 @@ $allProducts = $pdo->query("SELECT p.*, c.name_en AS category_name
                 <textarea name="ingredients" rows="3" class="form-control" placeholder="Hokkaido Fresh Cream|北海道産生クリーム&#10;Organic Wheat Flour|国産小麦粉"><?= e($ingredientsText); ?></textarea>
             </div>
 
-
             <!-- Associated Allergies -->
             <div class="form-group">
                 <label class="form-label">⚠️ Allergies (Format: <code>English|Japanese</code> per line)</label>
                 <textarea name="allergies" rows="2" class="form-control" placeholder="Milk|乳&#10;Eggs|卵&#10;Wheat|小麦"><?= e($allergiesText); ?></textarea>
             </div>
-
 
             <!-- Associated Customizations -->
             <div class="form-group">
@@ -362,14 +329,12 @@ $allProducts = $pdo->query("SELECT p.*, c.name_en AS category_name
                 <textarea name="customizations" rows="4" class="form-control" placeholder="Size|サイズ|Petite (4-inch)|プチ (4号)|0|1&#10;Size|サイズ|Classic Medium (6-inch)|ミディアム (6号)|800|0&#10;Message Plaque|メッセージプレート|Happy Birthday|Happy Birthday|150|0"><?= e($customizationsText); ?></textarea>
             </div>
 
-
             <div style="margin-top:24px; display:flex; gap:14px;">
                 <button type="submit" class="btn btn-primary btn-lg">💾 Save Dessert</button>
                 <a href="products.php" class="btn btn-secondary btn-lg">Cancel</a>
             </div>
         </form>
     </div>
-
 
 <?php else: ?>
     <!-- Products List View -->
@@ -381,7 +346,6 @@ $allProducts = $pdo->query("SELECT p.*, c.name_en AS category_name
             </div>
             <a href="products.php?action=new" class="btn btn-primary">+ Add New Dessert</a>
         </div>
-
 
         <div style="overflow-x:auto;">
             <table class="admin-table">
@@ -439,6 +403,5 @@ $allProducts = $pdo->query("SELECT p.*, c.name_en AS category_name
         </div>
     </div>
 <?php endif; ?>
-
 
 <?php require_once __DIR__ . '/footer.php'; ?>
