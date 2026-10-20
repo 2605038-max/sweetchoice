@@ -80,7 +80,7 @@ $shopAddress = getShopSetting($pdo, 'shop_address', 'Ginza 4-2-11, Chuo-ku, Toky
 <!-- Application Scripts -->
 <script src="../assets/js/main.js"></script>
 <script src="../assets/js/slider.js"></script>
-<script src="../assets/js/recommendation.js"></script>
+<script src="../assets/js/recommendation.js?v=<?= file_exists(__DIR__ . '/../assets/js/recommendation.js') ? filemtime(__DIR__ . '/../assets/js/recommendation.js') : time(); ?>"></script>
 
 </body>
 </html>

@@ -63,108 +63,96 @@ $seasonalProducts = $seasonStmt->fetchAll();
 </section>
 
 <!-- 2. AI Dessert Recommendation Section (HIGH PRIORITY) -->
-<section class="ai-recommendation-section" id="ai-recommendation-section">
-    <div class="container">
+<section class="ai-recommendation-section" id="ai-recommendation-section"
+    data-lang-view-details="<?= e(__('view_details', 'View Details')); ?>"
+    data-lang-add-to-cart="<?= e(__('add_to_cart', 'Add to Cart')); ?>"
+    data-lang-sold-out="<?= e(__('out_of_stock', 'Sold Out')); ?>"
+    data-lang-ai-sommelier="AI Sommelier"
+    data-lang-loading="<?= e(__('ai_loading', 'Analyzing flavor profiles & pairing desserts...')); ?>"
+    data-lang-choose-again="<?= isJapanese() ? 'もう一度選ぶ' : 'Choose Again'; ?>"
+    data-lang-no-match="<?= isJapanese() ? '条件に一致するデザートが見つかりませんでした。別の気分や味を選んでみてください！' : 'No desserts found matching this pairing. Try another mood or flavor!'; ?>">
+    <div class="container ai-section-container">
         <div class="section-header">
             <span class="section-tag">✨ <?= e(__('ai_section_badge', 'Interactive AI Sommelier')); ?></span>
             <h2 class="section-title"><?= e(__('ai_title', 'What are you craving today?')); ?></h2>
             <p class="section-subtitle"><?= e(__('ai_subtitle', 'Select your current mood and favorite flavor note to get an instant tailored recommendation.')); ?></p>
         </div>
 
-        <div class="ai-recommendation-card">
-            <div class="ai-grid">
-                <!-- Selectors column -->
-                <div class="ai-selectors-col">
-                    <!-- Mood Picker -->
-                    <div class="ai-filter-group">
-                        <label class="ai-label">
-                            <span>💭</span> <?= e(__('ai_mood_label', 'How are you feeling?')); ?>
-                        </label>
-                        <div class="ai-pill-grid">
-                            <?php
-                            $moods = [
-                                'happy' => __('mood_happy', 'Happy'),
-                                'sad' => __('mood_sad', 'Sad'),
-                                'stressed' => __('mood_stressed', 'Stressed'),
-                                'tired' => __('mood_tired', 'Tired'),
-                                'romantic' => __('mood_romantic', 'Romantic'),
-                                'celebrating' => __('mood_celebrating', 'Celebrating'),
-                                'relaxed' => __('mood_relaxed', 'Relaxed'),
-                                'energetic' => __('mood_energetic', 'Energetic')
-                            ];
-                            $firstMood = true;
-                            foreach ($moods as $moodKey => $moodLabel): ?>
-                                <button type="button" class="ai-pill ai-mood-pill <?= $firstMood ? 'active' : ''; ?>" data-mood="<?= $moodKey; ?>">
-                                    <?= e($moodLabel); ?>
-                                </button>
-                            <?php $firstMood = false; endforeach; ?>
-                        </div>
-                    </div>
-
-                    <!-- Taste Picker -->
-                    <div class="ai-filter-group">
-                        <label class="ai-label">
-                            <span>🍓</span> <?= e(__('ai_taste_label', 'What flavor profile are you craving?')); ?>
-                        </label>
-                        <div class="ai-pill-grid">
-                            <?php
-                            $tastes = [
-                                'cake' => __('taste_cake', 'Cake'),
-                                'chocolate' => __('taste_chocolate', 'Chocolate'),
-                                'fruit' => __('taste_fruit', 'Fruit'),
-                                'creamy' => __('taste_creamy', 'Creamy'),
-                                'cookie' => __('taste_cookie', 'Cookie'),
-                                'pudding' => __('taste_pudding', 'Pudding'),
-                                'very_sweet' => __('taste_very_sweet', 'Very Sweet'),
-                                'light_sweetness' => __('taste_light_sweetness', 'Light Sweetness')
-                            ];
-                            $firstTaste = true;
-                            foreach ($tastes as $tasteKey => $tasteLabel): ?>
-                                <button type="button" class="ai-pill ai-taste-pill <?= $firstTaste ? 'active' : ''; ?>" data-taste="<?= $tasteKey; ?>">
-                                    <?= e($tasteLabel); ?>
-                                </button>
-                            <?php $firstTaste = false; endforeach; ?>
-                        </div>
-                    </div>
-
-                    <div style="margin-top:24px;">
-                        <button type="button" id="ai-find-btn" class="btn btn-primary btn-block">
-                            ✨ <?= e(__('ai_button_find', 'Find My Perfect Dessert')); ?>
+        <!-- Step 1: Selection Form Card (Single-column, full-width within container) -->
+        <div class="ai-recommendation-card ai-selection-card" id="ai-selection-card">
+            <!-- Mood Picker -->
+            <div class="ai-filter-group">
+                <label class="ai-label">
+                    <span>💭</span> <?= e(__('ai_mood_label', 'How are you feeling?')); ?>
+                </label>
+                <div class="ai-pill-grid">
+                    <?php
+                    $moods = [
+                        'happy' => __('mood_happy', 'Happy'),
+                        'sad' => __('mood_sad', 'Sad'),
+                        'stressed' => __('mood_stressed', 'Stressed'),
+                        'tired' => __('mood_tired', 'Tired'),
+                        'romantic' => __('mood_romantic', 'Romantic'),
+                        'celebrating' => __('mood_celebrating', 'Celebrating'),
+                        'relaxed' => __('mood_relaxed', 'Relaxed'),
+                        'energetic' => __('mood_energetic', 'Energetic')
+                    ];
+                    $firstMood = true;
+                    foreach ($moods as $moodKey => $moodLabel): ?>
+                        <button type="button" class="ai-pill ai-mood-pill <?= $firstMood ? 'active' : ''; ?>" data-mood="<?= $moodKey; ?>">
+                            <?= e($moodLabel); ?>
                         </button>
-                    </div>
+                    <?php $firstMood = false; endforeach; ?>
                 </div>
+            </div>
 
-                <!-- Live Results Area -->
-                <div class="ai-result-column">
-                    <h3 style="font-size:1.15rem; margin-bottom:12px; font-weight:700; color:var(--color-deep-text);">
-                        <?= e(__('ai_result_title', 'AI Recommended For You')); ?>
-                    </h3>
-                    <div id="ai-result-container" class="ai-result-area">
-                        <!-- Default Initial Recommendation Card -->
-                        <div class="ai-result-card">
-                            <img src="../uploads/products/prod_strawberry_shortcake.jpg" alt="Strawberry Shortcake" class="ai-result-img">
-                            <div class="ai-result-info">
-                                <div>
-                                    <div class="product-category-tag">Cakes</div>
-                                    <h4 class="ai-result-name"><?= isJapanese() ? '極上いちごのショートケーキ' : 'Strawberry Shortcake'; ?></h4>
-                                    <div class="ai-result-price"><?= formatPrice(680); ?></div>
-                                    <div class="ai-result-reason">
-                                        <strong>AI Sommelier:</strong> "<?= isJapanese() ? '華やかな風味と彩りが、今のハッピーな気分をさらに盛り上げてくれる最高のデザートです！' : 'Strawberry Shortcake bursts with joyful, vibrant flavors that perfectly complement your cheerful mood!'; ?>"
-                                    </div>
-                                </div>
-                                <div class="ai-result-actions">
-                                    <a href="product.php?id=1" class="btn btn-secondary btn-sm"><?= e(__('view_details', 'View Details')); ?></a>
-                                    <form action="cart.php" method="POST" style="display:inline;">
-                                        <input type="hidden" name="action" value="add">
-                                        <input type="hidden" name="product_id" value="1">
-                                        <input type="hidden" name="quantity" value="1">
-                                        <button type="submit" class="btn btn-primary btn-sm"><?= e(__('add_to_cart', 'Add to Cart')); ?></button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <!-- Taste Picker -->
+            <div class="ai-filter-group">
+                <label class="ai-label">
+                    <span>🍓</span> <?= e(__('ai_taste_label', 'What flavor profile are you craving?')); ?>
+                </label>
+                <div class="ai-pill-grid">
+                    <?php
+                    $tastes = [
+                        'cake' => __('taste_cake', 'Cake'),
+                        'chocolate' => __('taste_chocolate', 'Chocolate'),
+                        'fruit' => __('taste_fruit', 'Fruit'),
+                        'creamy' => __('taste_creamy', 'Creamy'),
+                        'cookie' => __('taste_cookie', 'Cookie'),
+                        'pudding' => __('taste_pudding', 'Pudding'),
+                        'very_sweet' => __('taste_very_sweet', 'Very Sweet'),
+                        'light_sweetness' => __('taste_light_sweetness', 'Light Sweetness')
+                    ];
+                    $firstTaste = true;
+                    foreach ($tastes as $tasteKey => $tasteLabel): ?>
+                        <button type="button" class="ai-pill ai-taste-pill <?= $firstTaste ? 'active' : ''; ?>" data-taste="<?= $tasteKey; ?>">
+                            <?= e($tasteLabel); ?>
+                        </button>
+                    <?php $firstTaste = false; endforeach; ?>
                 </div>
+            </div>
+
+            <div class="ai-form-actions">
+                <button type="button" id="ai-find-btn" class="btn btn-primary btn-block ai-submit-btn">
+                    ✨ <?= e(__('ai_button_find', 'Find My Perfect Dessert')); ?>
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 2: Recommendation Result Card (Initially Hidden Below the Form) -->
+        <div id="ai-result-section" class="ai-recommendation-card ai-result-card-wrapper" style="display: none;">
+            <div class="ai-result-header">
+                <div>
+                    <span class="ai-result-badge">AI Sommelier Pairing</span>
+                    <h3 class="ai-result-heading"><?= e(__('ai_result_title', 'AI Recommended For You')); ?></h3>
+                </div>
+                <button type="button" id="ai-choose-again-btn" class="btn btn-secondary btn-sm ai-choose-again-btn">
+                    <?= isJapanese() ? '↺ もう一度選ぶ' : '↺ Choose Again'; ?>
+                </button>
+            </div>
+
+            <div id="ai-result-container" class="ai-result-area">
+                <!-- Dynamically populated by recommendation.js -->
             </div>
         </div>
     </div>
