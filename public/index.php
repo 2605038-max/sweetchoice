@@ -143,8 +143,8 @@ $seasonalProducts = $seasonStmt->fetchAll();
         <div id="ai-result-section" class="ai-recommendation-card ai-result-card-wrapper" style="display: none;">
             <div class="ai-result-header">
                 <div>
-                    <span class="ai-result-badge">AI Sommelier Pairing</span>
-                    <h3 class="ai-result-heading"><?= e(__('ai_result_title', 'AI Recommended For You')); ?></h3>
+                    <span class="ai-result-badge">Perfect Dessert Pairings</span>
+                    <h3 class="ai-result-heading"><?= e(__('ai_result_title', 'Your Dessert Matches')); ?></h3>
                 </div>
                 <button type="button" id="ai-choose-again-btn" class="btn btn-secondary btn-sm ai-choose-again-btn">
                     <?= isJapanese() ? '↺ もう一度選ぶ' : '↺ Choose Again'; ?>
@@ -163,8 +163,8 @@ $seasonalProducts = $seasonStmt->fetchAll();
     <div class="container">
         <div class="section-header">
             <span class="section-tag"><?= e(__('categories_title', 'Dessert Categories')); ?></span>
-            <h2 class="section-title"><?= isJapanese() ? 'パティシエ自慢のコレクション' : 'Explore Our 5 Artisan Collections'; ?></h2>
-            <p class="section-subtitle"><?= e(__('categories_subtitle', 'Explore our handcrafted delicacies across 5 artisan collections')); ?></p>
+            <h2 class="section-title"><?= isJapanese() ? 'パティシエのコレクション' : 'Explore Our  Collections'; ?></h2>
+            <p class="section-subtitle"><?= e(__('categories_subtitle', 'Explore our handcrafted delicacies collections')); ?></p>
         </div>
 
         <div class="category-grid">
@@ -250,8 +250,8 @@ $seasonalProducts = $seasonStmt->fetchAll();
     <div class="container">
         <div class="section-header">
             <span class="section-tag" style="background:#FFFFFF;"><?= e(__('seasonal_title', 'Seasonal Special Collection')); ?></span>
-            <h2 class="section-title"><?= isJapanese() ? '日本の四季を閉じ込めた限定スイーツ' : 'Limited Spring Edition Confections'; ?></h2>
-            <p class="section-subtitle"><?= e(__('seasonal_subtitle', 'Limited edition treats inspired by Japan’s four distinct seasons')); ?></p>
+            <h2 class="section-title"><?= isJapanese() ? '期間限定デザート' : 'Limited Seasonal Edition Confections'; ?></h2>
+            <p class="section-subtitle"><?= e(__('seasonal_subtitle', 'Limited-edition treats for seasonal events and celebrations')); ?></p>
         </div>
 
         <div class="product-grid" style="grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));">
