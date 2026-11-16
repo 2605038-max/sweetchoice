@@ -12,6 +12,9 @@ require_once __DIR__ . '/../includes/auth.php';
 $pdo = getDB();
 $cartId = getOrCreateCartId($pdo);
 
+// Revalidate all paired discounts in cart against live inventory before processing checkout
+revalidateCartPairingDiscounts($pdo, $cartId);
+
 // Fetch cart items
 $cartStmt = $pdo->prepare("SELECT ci.*, p.name_en, p.name_ja, p.price, p.image, p.stock 
                           FROM cart_items ci 
@@ -25,14 +28,19 @@ if (empty($cartItems)) {
     exit;
 }
 
-// Calculate totals
+// Calculate totals taking pairing discounts into account
 $productSubtotal = 0;
+$pairingDiscountTotal = 0;
 $customizationTotal = 0;
 foreach ($cartItems as $item) {
-    $productSubtotal += ((int)$item['price'] * (int)$item['quantity']);
-    $customizationTotal += ((int)$item['customization_price'] * (int)$item['quantity']);
+    $qty = (int)$item['quantity'];
+    $unitDisc = (int)($item['discount_amount'] ?? 0);
+    $productSubtotal += ((int)$item['price'] * $qty);
+    $pairingDiscountTotal += ($unitDisc * $qty);
+    $customizationTotal += ((int)$item['customization_price'] * $qty);
 }
 
+$effectiveProductSubtotal = max(0, $productSubtotal - $pairingDiscountTotal);
 $serviceFee = (int)getShopSetting($pdo, 'service_fee', '150');
 
 // Fetch Delivery Distance Tiers from MySQL
@@ -114,7 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 
     if (empty($errors)) {
-        $grandTotal = $productSubtotal + $customizationTotal + $serviceFee + $deliveryFee;
+        $grandTotal = $effectiveProductSubtotal + $customizationTotal + $serviceFee + $deliveryFee;
         $orderNumber = 'SWC-' . date('Ymd') . '-' . strtoupper(substr(bin2hex(random_bytes(3)), 0, 5));
         $userId = $user ? (int)$user['id'] : null;
 
@@ -123,8 +131,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
             // 1. Insert into orders
             $orderInsert = $pdo->prepare("INSERT INTO orders 
-                (order_number, user_id, fulfillment_type, pickup_date, pickup_time, delivery_date, delivery_time, distance_km, customer_name, customer_email, customer_phone, postal_code, address, apartment, subtotal, customization_total, delivery_fee, service_fee, grand_total, payment_method, payment_status, status, notes, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'paid', 'Order Received', ?, NOW())");
+                (order_number, user_id, fulfillment_type, pickup_date, pickup_time, delivery_date, delivery_time, distance_km, customer_name, customer_email, customer_phone, postal_code, address, apartment, subtotal, customization_total, pairing_discount_total, delivery_fee, service_fee, grand_total, payment_method, payment_status, status, notes, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'paid', 'Order Received', ?, NOW())");
             
             $orderInsert->execute([
                 $orderNumber,
@@ -141,8 +149,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 $postalCode,
                 $address,
                 $apartment,
-                $productSubtotal,
+                $effectiveProductSubtotal,
                 $customizationTotal,
+                $pairingDiscountTotal,
                 $deliveryFee,
                 $serviceFee,
                 $grandTotal,
@@ -153,19 +162,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
             // 2. Insert order items & customizations
             $itemInsert = $pdo->prepare("INSERT INTO order_items 
-                (order_id, product_id, product_name, price, quantity, customization_summary, customization_price, subtotal)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                (order_id, product_id, product_name, price, original_price, discount_amount, pairing_product_id, quantity, customization_summary, customization_price, subtotal)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
             $customInsert = $pdo->prepare("INSERT INTO order_customizations 
                 (order_item_id, group_name, option_name, price_extra) VALUES (?, ?, ?, ?)");
 
             foreach ($cartItems as $cItem) {
-                $lineSubtotal = ((int)$cItem['price'] + (int)$cItem['customization_price']) * (int)$cItem['quantity'];
+                $unitDisc = (int)($cItem['discount_amount'] ?? 0);
+                $unitFinalPrice = max(0, (int)$cItem['price'] - $unitDisc);
+                $lineSubtotal = ($unitFinalPrice + (int)$cItem['customization_price']) * (int)$cItem['quantity'];
+
                 $itemInsert->execute([
                     $orderId,
                     $cItem['product_id'],
                     $cItem['name_en'],
+                    $unitFinalPrice,
                     $cItem['price'],
+                    $unitDisc,
+                    $cItem['pairing_product_id'] ?? null,
                     $cItem['quantity'],
                     $cItem['customization_summary'],
                     $cItem['customization_price'],
@@ -227,7 +242,7 @@ require_once __DIR__ . '/../includes/header.php';
     <?php endif; ?>
 
     <form action="checkout.php" method="POST" id="checkout-form"
-          data-subtotal="<?= $productSubtotal; ?>" 
+          data-subtotal="<?= $effectiveProductSubtotal; ?>" 
           data-custom="<?= $customizationTotal; ?>" 
           data-service-fee="<?= $serviceFee; ?>">
         <input type="hidden" name="action" value="place_order">
@@ -407,16 +422,28 @@ require_once __DIR__ . '/../includes/header.php';
                     <!-- Mini items breakdown -->
                     <div style="margin-bottom:18px; max-height:220px; overflow-y:auto; padding-right:6px;">
                         <?php foreach ($cartItems as $cItem): 
-                            $lineSub = ((int)$cItem['price'] + (int)$cItem['customization_price']) * (int)$cItem['quantity'];
+                            $unitDisc = (int)($cItem['discount_amount'] ?? 0);
+                            $unitNet = max(0, (int)$cItem['price'] - $unitDisc);
+                            $lineSub = ($unitNet + (int)$cItem['customization_price']) * (int)$cItem['quantity'];
                         ?>
                             <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:0.88rem;">
                                 <div>
                                     <strong><?= e(getLocalized($cItem, 'name')); ?></strong> &times; <?= $cItem['quantity']; ?>
+                                    <?php if ($unitDisc > 0): ?>
+                                        <span class="badge" style="background:#FFE6EB; color:#C44569; font-size:0.7rem; padding:1px 6px;">
+                                            🌸 <?= sprintf(e(__('pairing_discount_badge', '%d%% OFF')), $cItem['discount_percent']); ?>
+                                        </span>
+                                    <?php endif; ?>
                                     <?php if ($cItem['customization_summary']): ?>
                                         <div style="font-size:0.75rem; color:var(--color-secondary-text);"><?= e($cItem['customization_summary']); ?></div>
                                     <?php endif; ?>
                                 </div>
-                                <div style="font-weight:600;"><?= formatPrice($lineSub); ?></div>
+                                <div style="font-weight:600;">
+                                    <?php if ($unitDisc > 0): ?>
+                                        <span style="text-decoration:line-through; font-size:0.75rem; color:#888; margin-right:4px;"><?= formatPrice(((int)$cItem['price'] + (int)$cItem['customization_price']) * (int)$cItem['quantity']); ?></span>
+                                    <?php endif; ?>
+                                    <?= formatPrice($lineSub); ?>
+                                </div>
                             </div>
                         <?php endforeach; ?>
                     </div>
@@ -425,6 +452,13 @@ require_once __DIR__ . '/../includes/header.php';
                         <span><?= e(__('product_subtotal', 'Product Subtotal')); ?>:</span>
                         <span><?= formatPrice($productSubtotal); ?></span>
                     </div>
+
+                    <?php if ($pairingDiscountTotal > 0): ?>
+                        <div class="summary-row" style="color:#2E7D32; font-weight:600;">
+                            <span>🌸 <?= e(__('pairing_cart_discount_label', 'Pairing Discount')); ?>:</span>
+                            <span>-<?= formatPrice($pairingDiscountTotal); ?></span>
+                        </div>
+                    <?php endif; ?>
 
                     <?php if ($customizationTotal > 0): ?>
                         <div class="summary-row">
@@ -445,7 +479,7 @@ require_once __DIR__ . '/../includes/header.php';
 
                     <div class="summary-row grand-total-row">
                         <span><?= e(__('grand_total', 'Grand Total')); ?>:</span>
-                        <span id="checkout-grand-total"><?= formatPrice($productSubtotal + $customizationTotal + $serviceFee); ?></span>
+                        <span id="checkout-grand-total"><?= formatPrice($effectiveProductSubtotal + $customizationTotal + $serviceFee); ?></span>
                     </div>
 
                     <div style="margin-top:24px;">

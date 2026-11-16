@@ -12,7 +12,7 @@ $currentLang = getCurrentLang();
 <!-- Announcement Notice Bar -->
 <div class="top-notice-bar">
     <div class="container" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-        <span>🌸 <?= isJapanese() ? '銀座本店より毎日手作り・焼きたてをお届けいたします。' : 'Handmade daily at our Ginza boutique with pure Hokkaido dairy & Kyoto matcha.'; ?></span>
+        <span> <?= isJapanese() ? '銀座本店より毎日手作り・焼きたてをお届けいたします。' : 'Handmade daily at our Ginza boutique with pure Hokkaido dairy & Kyoto matcha.'; ?></span>
         <span><?= e(__('all_prices_jpy', 'All prices in Japanese Yen (¥ / JPY)')); ?></span>
     </div>
 </div>
@@ -22,7 +22,7 @@ $currentLang = getCurrentLang();
     <div class="container nav-container">
         <!-- Brand Logo -->
         <a href="index.php" class="brand-wrapper">
-            <div class="brand-logo-icon">🍰</div>
+        
             <div class="brand-text">Sweet <span>Choice</span></div>
         </a>
 
@@ -75,7 +75,7 @@ $currentLang = getCurrentLang();
 
             <!-- Cart Icon with dynamic counter -->
             <a href="cart.php" class="nav-btn-icon" title="<?= e(__('nav_cart', 'Cart')); ?>">
-                🛒
+            🛒
                 <?php if ($cartCount > 0): ?>
                     <span class="badge-counter"><?= $cartCount; ?></span>
                 <?php endif; ?>

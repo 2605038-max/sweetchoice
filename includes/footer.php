@@ -16,7 +16,7 @@ $shopAddress = getShopSetting($pdo, 'shop_address', 'Ginza 4-2-11, Chuo-ku, Toky
             <!-- Brand Column -->
             <div class="footer-col">
                 <div class="brand-wrapper" style="margin-bottom:14px;">
-                    <div class="brand-logo-icon">🍰</div>
+                    <div class="brand-logo-icon">❤️</div>
                     <div class="brand-text" style="font-size:1.6rem;">Sweet <span>Choice</span></div>
                 </div>
                 <p style="color:var(--color-secondary-text); font-size:0.9rem; line-height:1.7; margin-bottom:16px;">
@@ -50,7 +50,7 @@ $shopAddress = getShopSetting($pdo, 'shop_address', 'Ginza 4-2-11, Chuo-ku, Toky
                     <?= e($shopHours); ?>
                 </p>
                 <p style="font-size:0.85rem; color:var(--color-secondary-text);">
-                    🌸 <?= isJapanese() ? '当日受取＆指定配達対応' : 'Daily boutique pickup & scheduled delivery available.'; ?>
+                    <?= isJapanese() ? '当日受取＆指定配達対応' : 'Daily boutique pickup & scheduled delivery available.'; ?>
                 </p>
             </div>
 
@@ -58,13 +58,13 @@ $shopAddress = getShopSetting($pdo, 'shop_address', 'Ginza 4-2-11, Chuo-ku, Toky
             <div class="footer-col">
                 <h4><?= e(__('footer_contact', 'Store Information')); ?></h4>
                 <p style="font-size:0.88rem; color:var(--color-secondary-text); margin-bottom:8px;">
-                    📍 <?= e($shopAddress); ?>
+                    <?= e($shopAddress); ?>
                 </p>
                 <p style="font-size:0.88rem; color:var(--color-secondary-text); margin-bottom:8px;">
-                    📞 <?= e($shopPhone); ?>
+                     <?= e($shopPhone); ?>
                 </p>
                 <p style="font-size:0.88rem; color:var(--color-secondary-text); margin-bottom:14px;">
-                    ✉️ <?= e($shopEmail); ?>
+                    <?= e($shopEmail); ?>
                 </p>
                 <span class="badge badge-available"><?= isJapanese() ? '日本円（¥ / JPY）決済' : 'Exclusively Japanese Yen (¥ / JPY)'; ?></span>
             </div>

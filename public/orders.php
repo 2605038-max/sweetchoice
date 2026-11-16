@@ -53,7 +53,7 @@ require_once __DIR__ . '/../includes/header.php';
     <?php if ($userId): ?>
         <?php if (empty($orders)): ?>
             <div style="background:#FFFFFF; border:1px solid var(--color-border); border-radius:var(--radius-md); padding:50px 20px; text-align:center; box-shadow:var(--shadow-sm);">
-                <div style="font-size:3rem; margin-bottom:12px;">📦</div>
+                <div style="font-size:3rem; margin-bottom:12px;"></div>
                 <h3><?= e(__('no_orders_found', 'You haven’t placed any orders yet.')); ?></h3>
                 <p style="color:var(--color-secondary-text); margin:8px 0 20px 0;">Our pastry chefs are ready to craft something sweet for you.</p>
                 <a href="category.php" class="btn btn-primary"><?= e(__('cart_empty_cta', 'Discover delicious treats now')); ?></a>
@@ -71,9 +71,9 @@ require_once __DIR__ . '/../includes/header.php';
                                 <?= renderOrderStatusBadge($ord['status']); ?>
                             </div>
                             <div style="font-size:0.88rem; color:var(--color-secondary-text);">
-                                📅 <?= date('Y/m/d H:i', strtotime($ord['created_at'])); ?> &bull; 
-                                <span><?= $isDelivery ? '🚚 ' . e(__('delivery_option', 'Delivery')) : '🏬 ' . e(__('pickup_option', 'Store Pickup')); ?></span> &bull; 
-                                <span>⏰ <?= e($scheduled); ?></span>
+                                <?= date('Y/m/d H:i', strtotime($ord['created_at'])); ?> &bull; 
+                                <span><?= $isDelivery ? ' ' . e(__('delivery_option', 'Delivery')) : ' ' . e(__('pickup_option', 'Store Pickup')); ?></span> &bull; 
+                                <span> <?= e($scheduled); ?></span>
                             </div>
                         </div>
 
@@ -83,7 +83,7 @@ require_once __DIR__ . '/../includes/header.php';
                                 <div style="font-size:1.3rem; font-weight:700; color:var(--color-deep-plum);"><?= formatPrice($ord['grand_total']); ?></div>
                             </div>
                             <a href="order-confirmation.php?order=<?= urlencode($ord['order_number']); ?>" class="btn btn-secondary btn-sm">
-                                🧾 <?= e(__('view_order_details', 'View Receipt')); ?>
+                                <?= e(__('view_order_details', 'View Receipt')); ?>
                             </a>
                         </div>
                     </div>
@@ -94,7 +94,7 @@ require_once __DIR__ . '/../includes/header.php';
     <?php else: ?>
         <!-- Guest Lookup Card -->
         <div style="background:#FFFFFF; border:1px solid var(--color-border); border-radius:var(--radius-md); padding:30px; box-shadow:var(--shadow-sm); max-width:640px; margin-bottom:30px;">
-            <h3 style="font-size:1.2rem; margin-bottom:12px;">🔍 Guest Order Lookup</h3>
+            <h3 style="font-size:1.2rem; margin-bottom:12px;"> Guest Order Lookup</h3>
             <p style="font-size:0.9rem; color:var(--color-secondary-text); margin-bottom:20px;">
                 Placed an order without an account? Enter your Order Number and Email address to view receipt and real-time status.
             </p>

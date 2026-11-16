@@ -24,6 +24,9 @@ $db_port = $db_port ?? (getenv('DB_PORT') ?: '3306');
 $db_name = $db_name ?? (getenv('DB_NAME') ?: 'db_sweetchoice');
 $db_user = $db_user ?? (getenv('DB_USER') ?: 'sweetchoice');
 $db_pass = $db_pass ?? (getenv('DB_PASS') ?: 'sweet123');
+
+global $pdo;
+
 try {
     $dsn = "mysql:host={$db_host};port={$db_port};dbname={$db_name};charset=utf8mb4";
     $options = [

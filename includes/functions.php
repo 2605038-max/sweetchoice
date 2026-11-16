@@ -336,3 +336,6 @@ function handleImageUpload(array $file, string $targetDir, string $prefix = 'img
     return ['success' => true, 'filename' => $newFilename, 'error' => null];
 }
 
+// Product Pairing & Inventory-Based Discount System
+require_once __DIR__ . '/pairings.php';
+

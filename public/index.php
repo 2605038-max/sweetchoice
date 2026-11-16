@@ -73,7 +73,7 @@ $seasonalProducts = $seasonStmt->fetchAll();
     data-lang-no-match="<?= isJapanese() ? '条件に一致するデザートが見つかりませんでした。別の気分や味を選んでみてください！' : 'No desserts found matching this pairing. Try another mood or flavor!'; ?>">
     <div class="container ai-section-container">
         <div class="section-header">
-            <span class="section-tag">✨ <?= e(__('ai_section_badge', 'Interactive AI Sommelier')); ?></span>
+            <span class="section-tag"> <?= e(__('ai_section_badge', 'Interactive AI Sommelier')); ?></span>
             <h2 class="section-title"><?= e(__('ai_title', 'What are you craving today?')); ?></h2>
             <p class="section-subtitle"><?= e(__('ai_subtitle', 'Select your current mood and favorite flavor note to get an instant tailored recommendation.')); ?></p>
         </div>
@@ -83,7 +83,7 @@ $seasonalProducts = $seasonStmt->fetchAll();
             <!-- Mood Picker -->
             <div class="ai-filter-group">
                 <label class="ai-label">
-                    <span>💭</span> <?= e(__('ai_mood_label', 'How are you feeling?')); ?>
+                    <?= e(__('ai_mood_label', 'How are you feeling?')); ?>
                 </label>
                 <div class="ai-pill-grid">
                     <?php
@@ -109,7 +109,7 @@ $seasonalProducts = $seasonStmt->fetchAll();
             <!-- Taste Picker -->
             <div class="ai-filter-group">
                 <label class="ai-label">
-                    <span>🍓</span> <?= e(__('ai_taste_label', 'What flavor profile are you craving?')); ?>
+                    <?= e(__('ai_taste_label', 'What flavor profile are you craving?')); ?>
                 </label>
                 <div class="ai-pill-grid">
                     <?php
@@ -134,7 +134,7 @@ $seasonalProducts = $seasonStmt->fetchAll();
 
             <div class="ai-form-actions">
                 <button type="button" id="ai-find-btn" class="btn btn-primary btn-block ai-submit-btn">
-                    ✨ <?= e(__('ai_button_find', 'Find My Perfect Dessert')); ?>
+                    <?= e(__('ai_button_find', 'Find My Perfect Dessert')); ?>
                 </button>
             </div>
         </div>

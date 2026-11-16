@@ -135,6 +135,20 @@ $translations = [
         'submit_review' => 'Submit Review',
         'review_verified' => 'Verified Buyer',
 
+        // Dessert & Drink Pairing with Inventory Discounts
+        'pairing_drinks_title' => 'Recommended Drinks for This Dessert',
+        'pairing_desserts_title' => 'Recommended Desserts for This Drink',
+        'pairing_drinks_subtitle' => 'Enhance your dessert experience with our chef-selected beverage pairings.',
+        'pairing_desserts_subtitle' => 'Pair your favorite drink with one of our handcrafted confections.',
+        'pairing_section_badge' => 'PERFECT PAIRING',
+        'pairing_discount_badge' => '%d%% OFF',
+        'pairing_instock_badge' => 'IN-STOCK SPECIAL',
+        'pairing_add_pairing' => '+ Add Pairing',
+        'pairing_original_price' => 'Original',
+        'pairing_discount_applied' => 'Pairing discount applied',
+        'pairing_bonus_notice' => 'Inventory Bonus: Special discount applied to this recommended item!',
+        'pairing_cart_discount_label' => 'Pairing Discount',
+
         // Cart Page
         'cart_title' => 'Shopping Cart',
         'cart_empty' => 'Your dessert cart is empty.',
@@ -318,6 +332,20 @@ $translations = [
         'your_review' => 'レビュー本文',
         'submit_review' => 'レビューを投稿',
         'review_verified' => '購入者認証済み',
+
+        // Dessert & Drink Pairing with Inventory Discounts
+        'pairing_drinks_title' => 'このスイーツにおすすめのドリンク',
+        'pairing_desserts_title' => 'このドリンクにおすすめのスイーツ',
+        'pairing_drinks_subtitle' => 'スイーツのおいしさを引き立てる、当店おすすめのペアリングドリンクです。',
+        'pairing_desserts_subtitle' => 'ドリンクにぴったりの、パティシエおすすめスイーツです。',
+        'pairing_section_badge' => 'おすすめペアリング',
+        'pairing_discount_badge' => '%d%% OFF',
+        'pairing_instock_badge' => '在庫連動セール',
+        'pairing_add_pairing' => '+ ペアリングを追加',
+        'pairing_original_price' => '通常価格',
+        'pairing_discount_applied' => 'ペアリング割引適用中',
+        'pairing_bonus_notice' => '在庫連動特典: おすすめ商品に特別割引が適用されています！',
+        'pairing_cart_discount_label' => 'ペアリング割引',
 
         // Cart Page
         'cart_title' => 'ショッピングカート',
