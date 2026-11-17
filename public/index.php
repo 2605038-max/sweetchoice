@@ -503,7 +503,7 @@ $seasonalProducts = $seasonStmt->fetchAll(PDO::FETCH_ASSOC);
         <div class="brand-story-grid">
             <div class="brand-story-visual">
                 <div class="brand-story-img-frame">
-                    <img src="../uploads/banners/banner_1792401665_7f772738.png" alt="Sweet Choice Artisan Pastry Prep" class="brand-story-img" onerror="this.src='../assets/images/logo_banner.jpg'">
+                    <img src="../uploads/banners/banner1.png" alt="Sweet Choice Artisan Pastry Prep" class="brand-story-img" onerror="this.src='../assets/images/logo_banner.jpg'">
                 </div>
                 <div class="brand-story-stat-card">
                     <span class="stat-number">2021</span>

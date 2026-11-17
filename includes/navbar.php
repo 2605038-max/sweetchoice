@@ -17,7 +17,7 @@ $currentLang = getCurrentLang();
         <!-- Brand Logo -->
         <a href="index.php" class="brand-wrapper">
             <div class="brand-identity">
-                <span class="brand-text">Sweet Choice</span>
+                <span class="brand-text">SWEET CHOICE</span>
                 <span class="brand-subtext">ATELIER GINZA</span>
             </div>
         </a>
