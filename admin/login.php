@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <div style="background:#FFFFFF; border-radius:var(--radius-lg); padding:40px; width:100%; max-width:440px; box-shadow:0 10px 40px rgba(0,0,0,0.3);">
     <div style="text-align:center; margin-bottom:26px;">
-        <div style="font-size:2.8rem; margin-bottom:10px;">🍰</div>
+        <div style="font-size:2.8rem; margin-bottom:10px;"></div>
         <h1 style="font-size:1.8rem; color:#2D2224;">Staff & Admin Portal</h1>
         <p style="font-size:0.88rem; color:var(--color-secondary-text);">Sweet Choice Boutique Management</p>
     </div>

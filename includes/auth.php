@@ -114,7 +114,7 @@ function registerUser(PDO $pdo, array $data): array {
     $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
 
     $insertStmt = $pdo->prepare("INSERT INTO users (name, email, password, phone, postal_code, address, apartment, role, created_at) 
-                                 VALUES (?, ?, ?, ?, ?, ?, ?, 'customer', NOW())");
+                                VALUES (?, ?, ?, ?, ?, ?, ?, 'customer', NOW())");
     $insertStmt->execute([$name, $email, $hashedPassword, $phone, $postal_code, $address, $apartment]);
     $userId = (int)$pdo->lastInsertId();
 

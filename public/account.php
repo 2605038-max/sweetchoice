@@ -164,7 +164,7 @@ require_once __DIR__ . '/../includes/header.php';
 
             <!-- Change Password Form -->
             <div style="background:#FFFFFF; border:1px solid var(--color-border); border-radius:var(--radius-md); padding:26px; box-shadow:var(--shadow-sm);">
-                <h3 style="font-size:1.2rem; margin-bottom:18px;">🔒 <?= e(__('change_password', 'Change Password')); ?></h3>
+                <h3 style="font-size:1.2rem; margin-bottom:18px;"> <?= e(__('change_password', 'Change Password')); ?></h3>
 
                 <?php if ($passwordMsg): ?>
                     <div class="alert alert-success"><?= e($passwordMsg); ?></div>
@@ -203,7 +203,7 @@ require_once __DIR__ . '/../includes/header.php';
             <!-- Order History Card -->
             <div style="background:#FFFFFF; border:1px solid var(--color-border); border-radius:var(--radius-md); padding:24px; box-shadow:var(--shadow-sm); margin-bottom:24px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-                    <h3 style="font-size:1.15rem;">📦 <?= e(__('my_orders', 'Recent Orders')); ?></h3>
+                    <h3 style="font-size:1.15rem;"> <?= e(__('my_orders', 'Recent Orders')); ?></h3>
                     <a href="orders.php" style="font-size:0.85rem; font-weight:600;"><?= e(__('view_all', 'View All')); ?> &rarr;</a>
                 </div>
 

@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($action === 'new' || $action === '
         if (empty($errors)) {
             if ($action === 'new') {
                 $ins = $pdo->prepare("INSERT INTO banners (title_en, title_ja, subtitle_en, subtitle_ja, button_text_en, button_text_ja, link, image, sort_order, is_active, created_at)
-                                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())");
+                                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())");
                 $ins->execute([$titleEn, $titleJa, $subtitleEn, $subtitleJa, $btnEn, $btnJa, $link, $imageName, $sortOrder, $isActive]);
                 setFlash('success', 'New banner slide added.');
             } else {
@@ -83,7 +83,7 @@ $allBanners = $pdo->query("SELECT * FROM banners ORDER BY sort_order ASC, id ASC
 <?php if ($action === 'new' || $action === 'edit'): ?>
     <div class="admin-card" style="max-width:800px; margin:0 auto;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h2 style="font-size:1.3rem;"><?= $action === 'new' ? '➕ Add Banner Slide' : '✏️ Edit Banner Slide #' . $banner['id']; ?></h2>
+            <h2 style="font-size:1.3rem;"><?= $action === 'new' ? ' Add Banner Slide' : 'Edit Banner Slide #' . $banner['id']; ?></h2>
             <a href="banners.php" class="btn btn-secondary btn-sm">&larr; Back to Banners</a>
         </div>
 
@@ -157,7 +157,7 @@ $allBanners = $pdo->query("SELECT * FROM banners ORDER BY sort_order ASC, id ASC
                 </label>
             </div>
 
-            <button type="submit" class="btn btn-primary btn-lg">💾 Save Banner</button>
+            <button type="submit" class="btn btn-primary btn-lg"> Save Banner</button>
         </form>
     </div>
 
@@ -165,7 +165,7 @@ $allBanners = $pdo->query("SELECT * FROM banners ORDER BY sort_order ASC, id ASC
     <div class="admin-card">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
             <div>
-                <h2 style="font-size:1.4rem;">🖼️ Hero Banner Carousel (<?= count($allBanners); ?>)</h2>
+                <h2 style="font-size:1.4rem;"> Hero Banner Carousel (<?= count($allBanners); ?>)</h2>
                 <p style="font-size:0.85rem; color:var(--color-secondary-text);">Manage sliding hero images on the storefront homepage.</p>
             </div>
             <a href="banners.php?action=new" class="btn btn-primary">+ Add New Banner</a>

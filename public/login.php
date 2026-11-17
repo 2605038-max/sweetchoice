@@ -44,7 +44,7 @@ require_once __DIR__ . '/../includes/header.php';
 <div class="container" style="padding: 60px 20px; max-width:480px;">
     <div style="background:#FFFFFF; border:1px solid var(--color-border); border-radius:var(--radius-lg); padding:36px; box-shadow:var(--shadow-md);">
         <div style="text-align:center; margin-bottom:24px;">
-            <div style="font-size:2.4rem; margin-bottom:8px;">🍰</div>
+            <div style="font-size:2.4rem; margin-bottom:8px;"></div>
             <h1 style="font-size:1.8rem;"><?= e(__('login_title', 'Customer Login')); ?></h1>
             <p style="font-size:0.88rem; color:var(--color-secondary-text);">Access your Sweet Choice favorites, cart, and past orders.</p>
         </div>

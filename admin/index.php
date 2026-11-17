@@ -66,6 +66,7 @@ $lowStock = $pdo->query("SELECT p.*, c.name_en AS category_name FROM products p 
     <div style="display:flex; flex-wrap:wrap; gap:12px;">
         <a href="products.php?action=new" class="btn btn-primary btn-sm">+ Add New Dessert</a>
         <a href="categories.php" class="btn btn-secondary btn-sm">Manage Categories</a>
+        <a href="pairings.php" class="btn btn-secondary btn-sm">Pairings & Discounts</a>
         <a href="banners.php" class="btn btn-secondary btn-sm">Manage Hero Banners</a>
         <a href="orders.php" class="btn btn-secondary btn-sm">Process Orders</a>
         <a href="reviews.php" class="btn btn-secondary btn-sm">Moderate Reviews</a>

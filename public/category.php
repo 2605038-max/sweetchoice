@@ -6,6 +6,7 @@
 
 $pageTitle = 'Dessert Menu';
 require_once __DIR__ . '/../includes/header.php';
+require_once __DIR__ . '/../includes/pairings.php';
 
 // Retrieve filter query parameters safely
 $catParam = $_GET['category'] ?? ($_GET['slug'] ?? 0);
@@ -23,7 +24,7 @@ $sort = trim($_GET['sort'] ?? 'featured');
 $categories = $pdo->query("SELECT * FROM categories WHERE is_active = 1 ORDER BY sort_order ASC, id ASC")->fetchAll();
 
 // Build SQL query with prepared parameters
-$sql = "SELECT p.*, c.name_en AS category_name_en, c.name_ja AS category_name_ja 
+$sql = "SELECT p.*, c.slug AS category_slug, c.name_en AS category_name_en, c.name_ja AS category_name_ja 
         FROM products p 
         JOIN categories c ON p.category_id = c.id 
         WHERE 1=1";
@@ -64,6 +65,18 @@ switch ($sort) {
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $products = $stmt->fetchAll();
+
+// Check if currently filtering drinks category or desserts
+$isDrinkCategory = false;
+if ($categoryId > 0) {
+    foreach ($categories as $c) {
+        if ((int)$c['id'] === $categoryId && $c['slug'] === 'drinks') {
+            $isDrinkCategory = true;
+            break;
+        }
+    }
+}
+$categoryPairings = getCategoryPairings($pdo, $isDrinkCategory, 4);
 ?>
 
 <div class="container" style="padding: 40px 20px;">
@@ -82,13 +95,13 @@ $products = $stmt->fetchAll();
             <!-- Category Tabs / Buttons -->
             <div style="display:flex; flex-wrap:wrap; gap:8px;">
                 <a href="category.php?<?= http_build_query(array_merge($_GET, ['category' => 0])); ?>" 
-                   class="btn btn-sm <?= $categoryId === 0 ? 'btn-primary' : 'btn-cream'; ?>">
-                   <?= e(__('all_categories', 'All Categories')); ?>
+                class="btn btn-sm <?= $categoryId === 0 ? 'btn-primary' : 'btn-cream'; ?>">
+                <?= e(__('all_categories', 'All Categories')); ?>
                 </a>
                 <?php foreach ($categories as $cat): ?>
                     <a href="category.php?<?= http_build_query(array_merge($_GET, ['category' => $cat['id']])); ?>" 
-                       class="btn btn-sm <?= $categoryId === (int)$cat['id'] ? 'btn-primary' : 'btn-cream'; ?>">
-                       <?= e(getLocalized($cat, 'name')); ?>
+                    class="btn btn-sm <?= $categoryId === (int)$cat['id'] ? 'btn-primary' : 'btn-cream'; ?>">
+                    <?= e(getLocalized($cat, 'name')); ?>
                     </a>
                 <?php endforeach; ?>
             </div>
@@ -98,8 +111,8 @@ $products = $stmt->fetchAll();
                 <!-- Search input -->
                 <div style="position:relative; min-width:240px;">
                     <input type="text" name="search" value="<?= e($search); ?>" 
-                           placeholder="<?= e(__('search_placeholder', 'Search desserts...')); ?>" 
-                           class="form-control" style="padding-right:32px;">
+                        placeholder="<?= e(__('search_placeholder', 'Search desserts...')); ?>" 
+                        class="form-control" style="padding-right:32px;">
                     <?php if ($categoryId > 0): ?>
                         <input type="hidden" name="category" value="<?= $categoryId; ?>">
                     <?php endif; ?>
@@ -124,7 +137,7 @@ $products = $stmt->fetchAll();
     <!-- Product Grid -->
     <?php if (empty($products)): ?>
         <div style="text-align:center; padding:60px 20px; background:#FAF6F6; border-radius:var(--radius-md);">
-            <div style="font-size:3rem; margin-bottom:12px;">🍰</div>
+            <div style="font-size:3rem; margin-bottom:12px;"></div>
             <h3><?= e(__('no_products_found', 'No desserts found matching your criteria.')); ?></h3>
             <p style="color:var(--color-secondary-text); margin-top:8px;">Try clearing your search terms or picking another category.</p>
             <a href="category.php" class="btn btn-primary" style="margin-top:16px;">View All Desserts</a>
@@ -158,6 +171,11 @@ $products = $stmt->fetchAll();
                                 <a href="product.php?id=<?= $prod['id']; ?>"><?= e(getLocalized($prod, 'name')); ?></a>
                             </h3>
                             <p class="product-desc"><?= e(getLocalized($prod, 'description')); ?></p>
+                            <div style="font-size:0.75rem; color:#C44569; margin-top:6px; font-weight:500;">
+                                <?= ($prod['category_slug'] === 'drinks') 
+                                    ? (isJapanese() ? ' スイーツペアリング対象' : ' Pairs with desserts') 
+                                    : (isJapanese() ? ' ドリンクペアリング対象' : ' Pairs with drinks'); ?>
+                            </div>
                         </div>
 
                         <div class="product-footer">
@@ -181,6 +199,9 @@ $products = $stmt->fetchAll();
             <?php endforeach; ?>
         </div>
     <?php endif; ?>
+    
 </div>
+
+
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>

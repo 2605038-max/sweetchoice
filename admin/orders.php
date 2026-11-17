@@ -102,7 +102,7 @@ $orders = $ordersStmt->fetchAll();
 
             <div style="background:#FFFDFD; border:1px solid var(--color-border); padding:16px; border-radius:var(--radius-sm);">
                 <h4 style="color:var(--color-deep-plum); margin-bottom:10px;">
-                    <?= $isDelivery ? '🚚 Delivery Details' : '🏬 Store Pickup Details'; ?>
+                    <?= $isDelivery ? ' Delivery Details' : 'Store Pickup Details'; ?>
                 </h4>
                 <p><strong>Fulfillment Method:</strong> <?= ucfirst($selectedOrder['fulfillment_type']); ?></p>
                 <p>
@@ -137,6 +137,11 @@ $orders = $ordersStmt->fetchAll();
                     <tr>
                         <td>
                             <strong><?= e($item['product_name']); ?></strong>
+                            <?php if (!empty($item['discount_amount']) && $item['discount_amount'] > 0): ?>
+                                <span class="badge" style="background:#FFE6EB; color:#C44569; font-size:0.75rem; padding:2px 6px; margin-left:4px;">
+                                    🌸 Pairing Discount (-<?= formatPrice($item['discount_amount']); ?>)
+                                </span>
+                            <?php endif; ?>
                             <?php if ($item['customization_summary']): ?>
                                 <div style="font-size:0.8rem; color:var(--color-secondary-text); margin-top:2px;">
                                     <?= e($item['customization_summary']); ?>
@@ -144,7 +149,14 @@ $orders = $ordersStmt->fetchAll();
                             <?php endif; ?>
                         </td>
                         <td style="text-align:center;"><?= $item['quantity']; ?></td>
-                        <td style="text-align:right;"><?= formatPrice((int)$item['price'] + (int)$item['customization_price']); ?></td>
+                        <td style="text-align:right;">
+                            <?php if (!empty($item['discount_amount']) && $item['discount_amount'] > 0 && !empty($item['original_price'])): ?>
+                                <span style="text-decoration:line-through; font-size:0.8rem; color:var(--color-secondary-text); margin-right:4px;">
+                                    <?= formatPrice($item['original_price']); ?>
+                                </span>
+                            <?php endif; ?>
+                            <?= formatPrice((int)$item['price'] + (int)$item['customization_price']); ?>
+                        </td>
                         <td style="text-align:right; font-weight:700; color:var(--color-deep-plum);"><?= formatPrice($item['subtotal']); ?></td>
                     </tr>
                 <?php endforeach; ?>
@@ -157,6 +169,12 @@ $orders = $ordersStmt->fetchAll();
                 <span>Product Subtotal:</span>
                 <span><?= formatPrice($selectedOrder['subtotal']); ?></span>
             </div>
+            <?php if (!empty($selectedOrder['pairing_discount_total']) && $selectedOrder['pairing_discount_total'] > 0): ?>
+                <div class="summary-row" style="color:#2E7D32; font-weight:600;">
+                    <span>Pairing Savings:</span>
+                    <span>-<?= formatPrice($selectedOrder['pairing_discount_total']); ?></span>
+                </div>
+            <?php endif; ?>
             <?php if ($selectedOrder['customization_total'] > 0): ?>
                 <div class="summary-row">
                     <span>Customization Total:</span>
@@ -185,7 +203,7 @@ $orders = $ordersStmt->fetchAll();
 <div class="admin-card">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:14px;">
         <div>
-            <h2 style="font-size:1.4rem;">📦 Order Management (<?= count($orders); ?>)</h2>
+            <h2 style="font-size:1.4rem;"> Order Management (<?= count($orders); ?>)</h2>
             <p style="font-size:0.85rem; color:var(--color-secondary-text);">Filter and process customer dessert orders in real time.</p>
         </div>
 

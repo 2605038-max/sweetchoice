@@ -7,6 +7,7 @@
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../includes/language.php';
+require_once __DIR__ . '/../includes/pairings.php';
 
 $pdo = getDB();
 $productId = isset($_GET['id']) && is_numeric($_GET['id']) ? (int)$_GET['id'] : 0;
@@ -18,9 +19,9 @@ if ($productId <= 0) {
 
 // Fetch product details
 $stmt = $pdo->prepare("SELECT p.*, c.name_en AS category_name_en, c.name_ja AS category_name_ja 
-                       FROM products p 
-                       JOIN categories c ON p.category_id = c.id 
-                       WHERE p.id = ?");
+                    FROM products p 
+                    JOIN categories c ON p.category_id = c.id 
+                    WHERE p.id = ?");
 $stmt->execute([$productId]);
 $product = $stmt->fetch();
 
@@ -52,21 +53,25 @@ foreach ($rawCustomizations as $cust) {
 
 // Fetch approved reviews
 $revStmt = $pdo->prepare("SELECT r.*, u.name AS user_name 
-                          FROM reviews r 
-                          JOIN users u ON r.user_id = u.id 
-                          WHERE r.product_id = ? AND r.is_approved = 1 
-                          ORDER BY r.created_at DESC");
+                        FROM reviews r 
+                        JOIN users u ON r.user_id = u.id 
+                        WHERE r.product_id = ? AND r.is_approved = 1 
+                        ORDER BY r.created_at DESC");
 $revStmt->execute([$productId]);
 $reviews = $revStmt->fetchAll();
+
+// Fetch bidirectional pairings for this product (dessert <-> drink)
+$isCurrentDrink = isDrinkProduct($pdo, $productId);
+$pairings = getProductPairings($pdo, $productId, 4);
 
 // Check if logged-in user has ordered this product and completed the order (for review eligibility)
 $canReview = false;
 $userId = $_SESSION['user_id'] ?? null;
 if ($userId) {
     $checkOrderStmt = $pdo->prepare("SELECT 1 FROM orders o 
-                                     JOIN order_items oi ON o.id = oi.order_id 
-                                     WHERE o.user_id = ? AND oi.product_id = ? AND o.status IN ('Completed', 'Delivered') 
-                                     LIMIT 1");
+                                    JOIN order_items oi ON o.id = oi.order_id 
+                                    WHERE o.user_id = ? AND oi.product_id = ? AND o.status IN ('Completed', 'Delivered') 
+                                    LIMIT 1");
     $checkOrderStmt->execute([$userId, $productId]);
     if ($checkOrderStmt->fetch()) {
         $canReview = true;
@@ -142,7 +147,7 @@ $isSoldOut = ($product['availability'] === 'sold_out');
 
             <!-- Allergy Information -->
             <div class="allergy-box">
-                <div class="box-title">⚠️ <?= e(__('allergy_heading', 'Allergy Information')); ?></div>
+                <div class="box-title"> <?= e(__('allergy_heading', 'Allergy Information')); ?></div>
                 <?php if (!empty($allergies)): ?>
                     <div class="allergy-alert">
                         <strong><?= e(__('allergy_warning', 'Contains allergens: ')); ?></strong>
@@ -167,7 +172,7 @@ $isSoldOut = ($product['availability'] === 'sold_out');
 
                 <?php if (!empty($customGroups)): ?>
                     <div class="customization-section">
-                        <h3 style="font-size:1.1rem; margin-bottom:16px;">✨ <?= e(__('customization_heading', 'Customize Your Treat')); ?></h3>
+                        <h3 style="font-size:1.1rem; margin-bottom:16px;"> <?= e(__('customization_heading', 'Customize Your Treat')); ?></h3>
                         <?php foreach ($customGroups as $groupName => $options): ?>
                             <div class="custom-group">
                                 <div class="custom-group-title"><?= e($groupName); ?>:</div>
@@ -180,12 +185,12 @@ $isSoldOut = ($product['availability'] === 'sold_out');
                                     ?>
                                         <label class="custom-option-label">
                                             <input type="radio" 
-                                                   name="custom[<?= e($opt['group_name_en']); ?>]" 
-                                                   value="<?= e($opt['id']); ?>" 
-                                                   class="custom-radio" 
-                                                   data-extra-price="<?= $extra; ?>"
-                                                   data-option-name="<?= e($optName); ?>"
-                                                   <?= $isChecked ? 'checked' : ''; ?>>
+                                                name="custom[<?= e($opt['group_name_en']); ?>]" 
+                                                value="<?= e($opt['id']); ?>" 
+                                                class="custom-radio" 
+                                                data-extra-price="<?= $extra; ?>"
+                                                data-option-name="<?= e($optName); ?>"
+                                                <?= $isChecked ? 'checked' : ''; ?>>
                                             <span><?= e($optName); ?></span>
                                             <?php if ($extra > 0): ?>
                                                 <span class="extra-price-tag">+<?= formatPrice($extra); ?></span>
@@ -219,12 +224,103 @@ $isSoldOut = ($product['availability'] === 'sold_out');
         </div>
     </div>
 
+    <!-- Bidirectional Pairing Recommendations Section -->
+    <?php if (!empty($pairings)): ?>
+        <section class="pairing-section" style="margin-top:50px; padding:32px; background:#FFFDFD; border:1px solid var(--color-dusty-rose); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm);">
+            <div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:16px; margin-bottom:24px;">
+                <div>
+                    <span class="badge" style="background:#FFE6EB; color:#C44569; font-weight:700; margin-bottom:8px; display:inline-block; font-size:0.78rem; letter-spacing:0.5px;">
+                        🌸 <?= e(__('pairing_section_badge', 'PERFECT PAIRING')); ?>
+                    </span>
+                    <h2 style="font-size:1.6rem; color:var(--color-deep-text); margin:0 0 6px 0;">
+                        <?= $isCurrentDrink ? e(__('pairing_desserts_title', 'Recommended Desserts for This Drink')) : e(__('pairing_drinks_title', 'Recommended Drinks for This Dessert')); ?>
+                    </h2>
+                    <p style="color:var(--color-secondary-text); font-size:0.92rem; margin:0;">
+                        <?= $isCurrentDrink ? e(__('pairing_desserts_subtitle', 'Pair your favorite drink with one of our handcrafted confections.')) : e(__('pairing_drinks_subtitle', 'Enhance your dessert experience with our chef-selected beverage pairings.')); ?>
+                    </p>
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:20px;">
+                <?php foreach ($pairings as $paired): 
+                    $isPairedFav = isProductFavorited($pdo, (int)$paired['id']);
+                ?>
+                    <div class="product-card" style="display:flex; flex-direction:column; justify-content:space-between; border-color:<?= $paired['is_eligible_discount'] ? 'var(--color-dusty-rose)' : 'var(--color-border)'; ?>;">
+                        <div class="product-img-wrapper" style="position:relative;">
+                            <div class="product-badges">
+                                <?php if ($paired['is_eligible_discount']): ?>
+                                    <span class="badge" style="background:#FF477E; color:#FFFFFF; font-weight:700; font-size:0.75rem; box-shadow:0 2px 6px rgba(255,71,126,0.3);">
+                                        <?= sprintf(e(__('pairing_discount_badge', '%d%% OFF')), $paired['discount_percent']); ?>
+                                    </span>
+                                <?php endif; ?>
+                                <?= renderAvailabilityBadge($paired['availability']); ?>
+                            </div>
+                            <button type="button" class="btn-favorite <?= $isPairedFav ? 'active' : ''; ?>" data-product-id="<?= $paired['id']; ?>" title="Favorite">♥</button>
+                            <a href="product.php?id=<?= $paired['id']; ?>">
+                                <img src="../uploads/products/<?= e($paired['image']); ?>" alt="<?= e(getLocalized($paired, 'name')); ?>" onerror="this.src='../assets/images/logo_banner.jpg'" style="aspect-ratio:4/3; object-fit:cover; width:100%;">
+                            </a>
+                        </div>
+
+                        <div class="product-body" style="padding:16px; display:flex; flex-direction:column; flex:1; justify-content:space-between;">
+                            <div>
+                                <div class="product-category-tag" style="font-size:0.78rem; text-transform:uppercase; letter-spacing:0.5px; color:var(--color-muted-plum);">
+                                    <?= e(getLocalized($paired, 'category_name')); ?>
+                                </div>
+                                <h3 class="product-title" style="font-size:1.05rem; margin:4px 0 8px 0; font-weight:600;">
+                                    <a href="product.php?id=<?= $paired['id']; ?>"><?= e(getLocalized($paired, 'name')); ?></a>
+                                </h3>
+                                <?php if (!empty($paired['description_en'])): ?>
+                                    <p class="product-desc" style="font-size:0.85rem; color:var(--color-secondary-text); margin-bottom:12px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">
+                                        <?= e(getLocalized($paired, 'description')); ?>
+                                    </p>
+                                <?php endif; ?>
+                            </div>
+
+                            <div class="product-footer" style="margin-top:12px; padding-top:12px; border-top:1px dashed var(--color-border-light); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+                                <div>
+                                    <?php if ($paired['is_eligible_discount']): ?>
+                                        <div style="font-size:0.8rem; text-decoration:line-through; color:var(--color-secondary-text);">
+                                            <?= formatPrice($paired['original_price']); ?>
+                                        </div>
+                                        <div style="font-size:1.15rem; font-weight:700; color:#D6336C;">
+                                            <?= formatPrice($paired['discounted_price']); ?>
+                                        </div>
+                                    <?php else: ?>
+                                        <div style="font-size:1.15rem; font-weight:700; color:var(--color-deep-plum);">
+                                            <?= formatPrice($paired['price']); ?>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+
+                                <div style="display:flex; gap:6px;">
+                                    <a href="product.php?id=<?= $paired['id']; ?>" class="btn btn-secondary btn-sm" style="padding:6px 10px; font-size:0.8rem;">
+                                        <?= e(__('view_details', 'Details')); ?>
+                                    </a>
+                                    <form action="cart.php" method="POST" style="margin:0;">
+                                        <input type="hidden" name="action" value="add">
+                                        <input type="hidden" name="product_id" value="<?= $paired['id']; ?>">
+                                        <input type="hidden" name="parent_product_id" value="<?= $productId; ?>">
+                                        <input type="hidden" name="is_pairing" value="1">
+                                        <input type="hidden" name="quantity" value="1">
+                                        <button type="submit" class="btn btn-primary btn-sm" style="padding:6px 12px; font-size:0.8rem;">
+                                            <?= $paired['is_eligible_discount'] ? e(__('pairing_add_pairing', '+ Add Pairing')) : e(__('quick_add', '+ Cart')); ?>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </section>
+    <?php endif; ?>
+
     <!-- Reviews Section -->
     <div style="margin-top:60px; padding-top:40px; border-top:1px solid var(--color-border);">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
             <h2 style="font-size:1.8rem;"><?= e(__('customer_reviews', 'Customer Reviews')); ?> (<?= count($reviews); ?>)</h2>
             <?php if ($canReview): ?>
-                <a href="#review-form" class="btn btn-secondary btn-sm">✍️ <?= e(__('write_review', 'Write a Review')); ?></a>
+                <a href="#review-form" class="btn btn-secondary btn-sm"> <?= e(__('write_review', 'Write a Review')); ?></a>
             <?php endif; ?>
         </div>
 
@@ -259,7 +355,7 @@ $isSoldOut = ($product['availability'] === 'sold_out');
         <!-- Eligible User Review Submission Form -->
         <?php if ($canReview): ?>
             <div id="review-form" style="margin-top:40px; background:#FAF6F7; border:1px solid var(--color-dusty-rose); border-radius:var(--radius-md); padding:26px;">
-                <h3 style="margin-bottom:16px;">✍️ <?= e(__('write_review', 'Write a Review')); ?></h3>
+                <h3 style="margin-bottom:16px;"><?= e(__('write_review', 'Write a Review')); ?></h3>
                 <form action="api/review.php" method="POST">
                     <input type="hidden" name="product_id" value="<?= $productId; ?>">
                     <input type="hidden" name="csrf_token" value="<?= getCsrfToken(); ?>">

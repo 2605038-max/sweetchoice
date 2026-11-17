@@ -221,9 +221,9 @@ if ($action === 'edit' && $productId > 0) {
 
 // Fetch list of all products for 'list' view
 $allProducts = $pdo->query("SELECT p.*, c.name_en AS category_name 
-                           FROM products p 
-                           JOIN categories c ON p.category_id = c.id 
-                           ORDER BY p.id DESC")->fetchAll();
+                        FROM products p 
+                        JOIN categories c ON p.category_id = c.id 
+                        ORDER BY p.id DESC")->fetchAll();
 ?>
 
 
@@ -231,7 +231,7 @@ $allProducts = $pdo->query("SELECT p.*, c.name_en AS category_name
     <!-- Form View -->
     <div class="admin-card" style="max-width:960px; margin:0 auto;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; padding-bottom:12px; border-bottom:1px solid var(--color-border);">
-            <h2 style="font-size:1.4rem;"><?= $action === 'new' ? '➕ Add New Dessert' : '✏️ Edit Dessert #' . $product['id']; ?></h2>
+            <h2 style="font-size:1.4rem;"><?= $action === 'new' ? ' Add New Dessert' : 'Edit Dessert #' . $product['id']; ?></h2>
             <a href="products.php" class="btn btn-secondary btn-sm">&larr; Back to Products</a>
         </div>
 
@@ -344,27 +344,27 @@ $allProducts = $pdo->query("SELECT p.*, c.name_en AS category_name
 
             <!-- Associated Ingredients -->
             <div class="form-group">
-                <label class="form-label">🌿 Ingredients (Format: <code>English|Japanese</code> per line)</label>
+                <label class="form-label">Ingredients (Format: <code>English|Japanese</code> per line)</label>
                 <textarea name="ingredients" rows="3" class="form-control" placeholder="Hokkaido Fresh Cream|北海道産生クリーム&#10;Organic Wheat Flour|国産小麦粉"><?= e($ingredientsText); ?></textarea>
             </div>
 
 
             <!-- Associated Allergies -->
             <div class="form-group">
-                <label class="form-label">⚠️ Allergies (Format: <code>English|Japanese</code> per line)</label>
+                <label class="form-label">Allergies (Format: <code>English|Japanese</code> per line)</label>
                 <textarea name="allergies" rows="2" class="form-control" placeholder="Milk|乳&#10;Eggs|卵&#10;Wheat|小麦"><?= e($allergiesText); ?></textarea>
             </div>
 
 
             <!-- Associated Customizations -->
             <div class="form-group">
-                <label class="form-label">✨ Customization Options (Format: <code>GroupEn|GroupJa|OptionEn|OptionJa|PriceExtraJPY|isDefault(1/0)</code> per line)</label>
+                <label class="form-label"> Customization Options (Format: <code>GroupEn|GroupJa|OptionEn|OptionJa|PriceExtraJPY|isDefault(1/0)</code> per line)</label>
                 <textarea name="customizations" rows="4" class="form-control" placeholder="Size|サイズ|Petite (4-inch)|プチ (4号)|0|1&#10;Size|サイズ|Classic Medium (6-inch)|ミディアム (6号)|800|0&#10;Message Plaque|メッセージプレート|Happy Birthday|Happy Birthday|150|0"><?= e($customizationsText); ?></textarea>
             </div>
 
 
             <div style="margin-top:24px; display:flex; gap:14px;">
-                <button type="submit" class="btn btn-primary btn-lg">💾 Save Dessert</button>
+                <button type="submit" class="btn btn-primary btn-lg">Save Dessert</button>
                 <a href="products.php" class="btn btn-secondary btn-lg">Cancel</a>
             </div>
         </form>
@@ -376,7 +376,7 @@ $allProducts = $pdo->query("SELECT p.*, c.name_en AS category_name
     <div class="admin-card">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
             <div>
-                <h2 style="font-size:1.4rem;">🍰 Desserts Inventory (<?= count($allProducts); ?>)</h2>
+                <h2 style="font-size:1.4rem;">Desserts Inventory (<?= count($allProducts); ?>)</h2>
                 <p style="font-size:0.85rem; color:var(--color-secondary-text);">Manage artisan confections, stock levels, JPY pricing, and AI recommendation tags.</p>
             </div>
             <a href="products.php?action=new" class="btn btn-primary">+ Add New Dessert</a>
@@ -417,7 +417,7 @@ $allProducts = $pdo->query("SELECT p.*, c.name_en AS category_name
                                 </span>
                             </td>
                             <td><?= renderAvailabilityBadge($p['availability']); ?></td>
-                            <td><?= $p['is_popular'] ? '⭐ Yes' : '<span style="color:#aaa;">No</span>'; ?></td>
+                            <td><?= $p['is_popular'] ? 'Yes' : '<span style="color:#aaa;">No</span>'; ?></td>
                             <td>
                                 <span style="font-size:0.75rem; color:var(--color-secondary-text); max-width:140px; display:inline-block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="<?= e($p['tags']); ?>">
                                     <?= e($p['tags']); ?>
@@ -427,9 +427,9 @@ $allProducts = $pdo->query("SELECT p.*, c.name_en AS category_name
                                 <div style="display:flex; gap:6px;">
                                     <a href="products.php?action=edit&id=<?= $p['id']; ?>" class="btn btn-secondary btn-sm" style="padding:4px 8px; font-size:0.75rem;">Edit</a>
                                     <a href="products.php?action=delete&id=<?= $p['id']; ?>&csrf_token=<?= getCsrfToken(); ?>" 
-                                       class="btn btn-secondary btn-sm" 
-                                       style="padding:4px 8px; font-size:0.75rem; color:var(--color-danger);"
-                                       onclick="return confirm('Are you sure you want to delete this dessert?');">Delete</a>
+                                    class="btn btn-secondary btn-sm" 
+                                    style="padding:4px 8px; font-size:0.75rem; color:var(--color-danger);"
+                                    onclick="return confirm('Are you sure you want to delete this dessert?');">Delete</a>
                                 </div>
                             </td>
                         </tr>

@@ -93,7 +93,7 @@ $allCategories = $pdo->query("SELECT c.*, (SELECT COUNT(*) FROM products p WHERE
 <?php if ($action === 'new' || $action === 'edit'): ?>
     <div class="admin-card" style="max-width:700px; margin:0 auto;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h2 style="font-size:1.3rem;"><?= $action === 'new' ? '➕ Add Category' : '✏️ Edit Category #' . $category['id']; ?></h2>
+            <h2 style="font-size:1.3rem;"><?= $action === 'new' ? 'Add Category' : 'Edit Category #' . $category['id']; ?></h2>
             <a href="categories.php" class="btn btn-secondary btn-sm">&larr; Back to Categories</a>
         </div>
 
@@ -155,7 +155,7 @@ $allCategories = $pdo->query("SELECT c.*, (SELECT COUNT(*) FROM products p WHERE
                 </label>
             </div>
 
-            <button type="submit" class="btn btn-primary btn-lg">💾 Save Category</button>
+            <button type="submit" class="btn btn-primary btn-lg"> Save Category</button>
         </form>
     </div>
 
@@ -163,7 +163,7 @@ $allCategories = $pdo->query("SELECT c.*, (SELECT COUNT(*) FROM products p WHERE
     <div class="admin-card">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
             <div>
-                <h2 style="font-size:1.4rem;">📁 Confection Categories (<?= count($allCategories); ?>)</h2>
+                <h2 style="font-size:1.4rem;">Confection Categories (<?= count($allCategories); ?>)</h2>
                 <p style="font-size:0.85rem; color:var(--color-secondary-text);">Organize your shop menu into collections.</p>
             </div>
             <a href="categories.php?action=new" class="btn btn-primary">+ Add New Category</a>

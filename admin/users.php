@@ -96,7 +96,7 @@ $allUsers = $pdo->query("SELECT u.*, (SELECT COUNT(*) FROM orders o WHERE o.user
 <?php if ($action === 'new' || $action === 'edit'): ?>
     <div class="admin-card" style="max-width:700px; margin:0 auto;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h2 style="font-size:1.3rem;"><?= $action === 'new' ? '➕ Add User' : '✏️ Edit User #' . $user['id']; ?></h2>
+            <h2 style="font-size:1.3rem;"><?= $action === 'new' ? ' Add User' : ' Edit User #' . $user['id']; ?></h2>
             <a href="users.php" class="btn btn-secondary btn-sm">&larr; Back to Users</a>
         </div>
 
@@ -148,7 +148,7 @@ $allUsers = $pdo->query("SELECT u.*, (SELECT COUNT(*) FROM orders o WHERE o.user
                 <input type="text" name="address" class="form-control" value="<?= e($user['address']); ?>">
             </div>
 
-            <button type="submit" class="btn btn-primary btn-lg">💾 Save User</button>
+            <button type="submit" class="btn btn-primary btn-lg">Save User</button>
         </form>
     </div>
 
@@ -194,9 +194,9 @@ $allUsers = $pdo->query("SELECT u.*, (SELECT COUNT(*) FROM orders o WHERE o.user
                                 <a href="users.php?action=edit&id=<?= $u['id']; ?>" class="btn btn-secondary btn-sm" style="padding:4px 8px; font-size:0.75rem;">Edit</a>
                                 <?php if ($u['id'] !== (int)$_SESSION['user_id']): ?>
                                     <a href="users.php?action=delete&id=<?= $u['id']; ?>&csrf_token=<?= getCsrfToken(); ?>" 
-                                       class="btn btn-secondary btn-sm" 
-                                       style="padding:4px 8px; font-size:0.75rem; color:var(--color-danger);"
-                                       onclick="return confirm('Delete this user account?');">Delete</a>
+                                    class="btn btn-secondary btn-sm" 
+                                    style="padding:4px 8px; font-size:0.75rem; color:var(--color-danger);"
+                                    onclick="return confirm('Delete this user account?');">Delete</a>
                                 <?php endif; ?>
                             </div>
                         </td>

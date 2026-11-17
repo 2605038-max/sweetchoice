@@ -108,6 +108,11 @@ require_once __DIR__ . '/../includes/header.php';
                     <tr>
                         <td>
                             <strong><?= e($item['product_name']); ?></strong>
+                            <?php if (!empty($item['discount_amount']) && $item['discount_amount'] > 0): ?>
+                                <span class="badge" style="background:#FFE6EB; color:#C44569; font-size:0.7rem; padding:1px 6px; margin-left:4px;">
+                                    🌸 <?= e(__('pairing_discount_applied', 'Pairing discount applied')); ?> (-<?= formatPrice($item['discount_amount']); ?>)
+                                </span>
+                            <?php endif; ?>
                             <?php if (!empty($item['customization_summary'])): ?>
                                 <div style="font-size:0.8rem; color:var(--color-secondary-text); margin-top:2px;">
                                     <?= e($item['customization_summary']); ?>
@@ -116,6 +121,11 @@ require_once __DIR__ . '/../includes/header.php';
                         </td>
                         <td style="text-align:center;"><?= $item['quantity']; ?></td>
                         <td style="text-align:right;">
+                            <?php if (!empty($item['discount_amount']) && $item['discount_amount'] > 0 && !empty($item['original_price'])): ?>
+                                <span style="text-decoration:line-through; font-size:0.8rem; color:var(--color-secondary-text); margin-right:4px;">
+                                    <?= formatPrice($item['original_price']); ?>
+                                </span>
+                            <?php endif; ?>
                             <?= formatPrice((int)$item['price'] + (int)$item['customization_price']); ?>
                         </td>
                         <td style="text-align:right; font-weight:700; color:var(--color-deep-plum);">
@@ -158,7 +168,7 @@ require_once __DIR__ . '/../includes/header.php';
     <!-- Bottom Actions -->
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
         <a href="category.php" class="btn btn-secondary">&larr; <?= e(__('continue_shopping', 'Continue Shopping')); ?></a>
-        <a href="orders.php" class="btn btn-primary">📋 <?= e(__('my_orders', 'View All Orders')); ?></a>
+        <a href="orders.php" class="btn btn-primary"> <?= e(__('my_orders', 'View All Orders')); ?></a>
     </div>
 </div>
 

@@ -7,6 +7,7 @@
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../includes/language.php';
+require_once __DIR__ . '/../includes/pairings.php';
 
 $pdo = getDB();
 $cartId = getOrCreateCartId($pdo);
@@ -19,6 +20,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $productId = (int)($_POST['product_id'] ?? 0);
         $qty = max(1, (int)($_POST['quantity'] ?? 1));
         $customSelections = $_POST['custom'] ?? [];
+        $isPairing = !empty($_POST['is_pairing']);
+        $parentProductId = isset($_POST['parent_product_id']) ? (int)$_POST['parent_product_id'] : null;
 
         // Verify product exists and is available
         $prodStmt = $pdo->prepare("SELECT id, name_en, name_ja, price, stock, availability FROM products WHERE id = ?");
@@ -48,10 +51,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $summaryStr = !empty($customSummary) ? implode(' | ', $customSummary) : null;
 
-            // Check if identical item with same customizations already exists in this cart
+            // Calculate pairing discount eligibility server-side
+            $discountPercent = 0;
+            $discountAmount = 0;
+            $pairingParentId = null;
+
+            if ($isPairing) {
+                $val = validatePairingEligibility($pdo, $parentProductId ?: $productId, $productId);
+                if ($val['valid'] && $val['is_eligible']) {
+                    $discountPercent = (int)$val['discount_percent'];
+                    $discountAmount = (int)$val['discount_amount'];
+                    $pairingParentId = $parentProductId ?: $productId;
+                }
+            }
+
+            // Check if identical item with same customizations and discount already exists in this cart
             $existingStmt = $pdo->prepare("SELECT id, quantity FROM cart_items 
-                                           WHERE cart_id = ? AND product_id = ? AND (customization_summary = ? OR (customization_summary IS NULL AND ? IS NULL))");
-            $existingStmt->execute([$cartId, $productId, $summaryStr, $summaryStr]);
+                                           WHERE cart_id = ? AND product_id = ? 
+                                             AND (customization_summary = ? OR (customization_summary IS NULL AND ? IS NULL))
+                                             AND discount_amount = ?");
+            $existingStmt->execute([$cartId, $productId, $summaryStr, $summaryStr, $discountAmount]);
             $existing = $existingStmt->fetch();
 
             if ($existing) {
@@ -59,12 +78,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $upd = $pdo->prepare("UPDATE cart_items SET quantity = ? WHERE id = ?");
                 $upd->execute([$newQty, $existing['id']]);
             } else {
-                $ins = $pdo->prepare("INSERT INTO cart_items (cart_id, product_id, quantity, customization_summary, customization_price, created_at) 
-                                      VALUES (?, ?, ?, ?, ?, NOW())");
-                $ins->execute([$cartId, $productId, min($qty, (int)$prod['stock']), $summaryStr, $extraPricePerUnit]);
+                $ins = $pdo->prepare("INSERT INTO cart_items (cart_id, product_id, quantity, customization_summary, customization_price, pairing_product_id, discount_percent, discount_amount, created_at) 
+                                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())");
+                $ins->execute([$cartId, $productId, min($qty, (int)$prod['stock']), $summaryStr, $extraPricePerUnit, $pairingParentId, $discountPercent, $discountAmount]);
             }
 
-            setFlash('success', isJapanese() ? '商品をカートに追加しました。' : 'Added dessert to your cart!');
+            if ($discountAmount > 0) {
+                setFlash('success', isJapanese() ? 'ペアリング特別割引が適用された商品をカートに追加しました！' : 'Added recommended pairing with special discount to your cart!');
+            } else {
+                setFlash('success', isJapanese() ? '商品をカートに追加しました。' : 'Added dessert to your cart!');
+            }
         }
         header("Location: cart.php");
         exit;
@@ -93,28 +116,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Fetch all cart items with product details
+// Revalidate all paired discounts in cart against live inventory before rendering
+revalidateCartPairingDiscounts($pdo, $cartId);
+
+// Fetch all cart items with product details and paired parent details
 $cartItemsStmt = $pdo->prepare("SELECT ci.*, p.name_en, p.name_ja, p.price, p.image, p.stock, p.availability, 
-                                       c.name_en AS category_name_en, c.name_ja AS category_name_ja 
+                                       c.name_en AS category_name_en, c.name_ja AS category_name_ja,
+                                       parent_p.name_en AS parent_name_en, parent_p.name_ja AS parent_name_ja
                                 FROM cart_items ci 
                                 JOIN products p ON ci.product_id = p.id 
                                 JOIN categories c ON p.category_id = c.id 
+                                LEFT JOIN products parent_p ON ci.pairing_product_id = parent_p.id
                                 WHERE ci.cart_id = ? 
                                 ORDER BY ci.id DESC");
 $cartItemsStmt->execute([$cartId]);
 $items = $cartItemsStmt->fetchAll();
 
-// Calculate subtotal, customization total, and service fee
+// Calculate subtotal, pairing discount savings, customization total, and service fee
 $productSubtotal = 0;
+$pairingDiscountTotal = 0;
 $customizationTotal = 0;
 
 foreach ($items as $item) {
-    $productSubtotal += ((int)$item['price'] * (int)$item['quantity']);
-    $customizationTotal += ((int)$item['customization_price'] * (int)$item['quantity']);
+    $qty = (int)$item['quantity'];
+    $productSubtotal += ((int)$item['price'] * $qty);
+    $pairingDiscountTotal += ((int)($item['discount_amount'] ?? 0) * $qty);
+    $customizationTotal += ((int)$item['customization_price'] * $qty);
 }
 
+$effectiveProductSubtotal = max(0, $productSubtotal - $pairingDiscountTotal);
 $serviceFee = (int)getShopSetting($pdo, 'service_fee', '150');
-$grandTotal = $productSubtotal + $customizationTotal + $serviceFee;
+$grandTotal = $effectiveProductSubtotal + $customizationTotal + $serviceFee;
 
 $pageTitle = __('cart_title', 'Shopping Cart');
 require_once __DIR__ . '/../includes/header.php';
@@ -151,7 +183,9 @@ require_once __DIR__ . '/../includes/header.php';
                     </thead>
                     <tbody>
                         <?php foreach ($items as $item): 
-                            $unitTotal = (int)$item['price'] + (int)$item['customization_price'];
+                            $unitDisc = (int)($item['discount_amount'] ?? 0);
+                            $unitFinalBase = max(0, (int)$item['price'] - $unitDisc);
+                            $unitTotal = $unitFinalBase + (int)$item['customization_price'];
                             $lineSubtotal = $unitTotal * (int)$item['quantity'];
                         ?>
                             <tr>
@@ -162,6 +196,16 @@ require_once __DIR__ . '/../includes/header.php';
                                             <div class="cart-item-title">
                                                 <a href="product.php?id=<?= $item['product_id']; ?>"><?= e(getLocalized($item, 'name')); ?></a>
                                             </div>
+                                            <?php if (!empty($item['pairing_product_id'])): ?>
+                                                <div style="margin-top:4px;">
+                                                    <span class="badge" style="background:#FFE6EB; color:#C44569; font-size:0.72rem; padding:2px 8px; font-weight:700;">
+                                                        🌸 <?= e(__('pairing_section_badge', 'PERFECT PAIRING')); ?>
+                                                        <?php if (!empty($item['parent_name_en'])): ?>
+                                                            (<?= isJapanese() ? e($item['parent_name_ja']) . 'とセット' : 'with ' . e($item['parent_name_en']); ?>)
+                                                        <?php endif; ?>
+                                                    </span>
+                                                </div>
+                                            <?php endif; ?>
                                             <?php if (!empty($item['customization_summary'])): ?>
                                                 <div class="cart-item-custom-list">
                                                     <?= e($item['customization_summary']); ?>
@@ -171,7 +215,19 @@ require_once __DIR__ . '/../includes/header.php';
                                     </div>
                                 </td>
                                 <td>
-                                    <div><?= formatPrice($item['price']); ?></div>
+                                    <?php if ($unitDisc > 0): ?>
+                                        <div style="font-size:0.8rem; text-decoration:line-through; color:var(--color-secondary-text);">
+                                            <?= formatPrice($item['price']); ?>
+                                        </div>
+                                        <div style="font-weight:700; color:#D6336C; font-size:1.05rem;">
+                                            <?= formatPrice($unitFinalBase); ?>
+                                        </div>
+                                        <div style="font-size:0.75rem; color:#2E7D32; font-weight:600;">
+                                            -<?= formatPrice($unitDisc); ?> (<?= (int)$item['discount_percent']; ?>% OFF)
+                                        </div>
+                                    <?php else: ?>
+                                        <div><?= formatPrice($item['price']); ?></div>
+                                    <?php endif; ?>
                                     <?php if ($item['customization_price'] > 0): ?>
                                         <div style="font-size:0.8rem; color:var(--color-deep-plum);">+<?= formatPrice($item['customization_price']); ?> (opt)</div>
                                     <?php endif; ?>
@@ -218,6 +274,13 @@ require_once __DIR__ . '/../includes/header.php';
                     <span><?= e(__('product_subtotal', 'Product Subtotal')); ?>:</span>
                     <span><?= formatPrice($productSubtotal); ?></span>
                 </div>
+
+                <?php if ($pairingDiscountTotal > 0): ?>
+                    <div class="summary-row" style="color:#2E7D32; font-weight:600;">
+                        <span>🌸 <?= e(__('pairing_cart_discount_label', 'Pairing Discount')); ?>:</span>
+                        <span>-<?= formatPrice($pairingDiscountTotal); ?></span>
+                    </div>
+                <?php endif; ?>
 
                 <?php if ($customizationTotal > 0): ?>
                     <div class="summary-row">

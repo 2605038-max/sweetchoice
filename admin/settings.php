@@ -122,7 +122,7 @@ $shopHoursDisplay = getShopSetting($pdo, 'business_hours_display', 'Mon - Sun: 1
 <div style="display:grid; grid-template-columns:1fr 1fr; gap:26px;">
     <!-- 1. General & Service Fee Settings -->
     <div class="admin-card">
-        <h3 style="font-size:1.2rem; margin-bottom:18px;">⚙️ Store & Service Fee Settings</h3>
+        <h3 style="font-size:1.2rem; margin-bottom:18px;"> Store & Service Fee Settings</h3>
         <form action="settings.php" method="POST">
             <input type="hidden" name="csrf_token" value="<?= getCsrfToken(); ?>">
             <input type="hidden" name="section" value="general">
@@ -165,7 +165,7 @@ $shopHoursDisplay = getShopSetting($pdo, 'business_hours_display', 'Mon - Sun: 1
 
     <!-- 2. Distance-Based Delivery Fee Tiers -->
     <div class="admin-card">
-        <h3 style="font-size:1.2rem; margin-bottom:18px;">🚚 Distance-Based Delivery Tiers</h3>
+        <h3 style="font-size:1.2rem; margin-bottom:18px;"> Distance-Based Delivery Tiers</h3>
         <p style="font-size:0.85rem; color:var(--color-secondary-text); margin-bottom:16px;">
             Configure tiered delivery pricing in Japanese Yen (¥ / JPY) based on customer distance.
         </p>
@@ -209,7 +209,7 @@ $shopHoursDisplay = getShopSetting($pdo, 'business_hours_display', 'Mon - Sun: 1
 
     <!-- 3. Pickup Slots -->
     <div class="admin-card">
-        <h3 style="font-size:1.2rem; margin-bottom:14px;">🏬 Boutique Pickup Slots</h3>
+        <h3 style="font-size:1.2rem; margin-bottom:14px;"> Boutique Pickup Slots</h3>
         <p style="font-size:0.85rem; color:var(--color-secondary-text); margin-bottom:14px;">Hourly pickup windows available during business hours.</p>
 
         <table class="admin-table" style="margin-bottom:18px;">
@@ -248,7 +248,7 @@ $shopHoursDisplay = getShopSetting($pdo, 'business_hours_display', 'Mon - Sun: 1
 
     <!-- 4. Delivery Slots -->
     <div class="admin-card">
-        <h3 style="font-size:1.2rem; margin-bottom:14px;">🚚 Local Delivery Slots</h3>
+        <h3 style="font-size:1.2rem; margin-bottom:14px;"> Local Delivery Slots</h3>
         <p style="font-size:0.85rem; color:var(--color-secondary-text); margin-bottom:14px;">Scheduled delivery windows for courier dispatch.</p>
 
         <table class="admin-table" style="margin-bottom:18px;">
@@ -314,7 +314,7 @@ $shopHoursDisplay = getShopSetting($pdo, 'business_hours_display', 'Mon - Sun: 1
 
     <!-- 6. Business Operating Hours -->
     <div class="admin-card">
-        <h3 style="font-size:1.2rem; margin-bottom:14px;">🕒 Weekly Business Hours</h3>
+        <h3 style="font-size:1.2rem; margin-bottom:14px;"> Weekly Business Hours</h3>
         <form action="settings.php" method="POST">
             <input type="hidden" name="csrf_token" value="<?= getCsrfToken(); ?>">
             <input type="hidden" name="section" value="hours">

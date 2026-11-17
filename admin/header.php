@@ -131,7 +131,7 @@ $adminScript = basename($_SERVER['PHP_SELF']);
     <div class="admin-nav-inner">
         <div style="display:flex; align-items:center; gap:16px;">
             <a href="index.php" style="color:#FFF; font-weight:700; font-size:1.2rem; display:flex; align-items:center; gap:8px;">
-                <span>🍰</span> Sweet Choice Staff
+                Sweet Choice Staff
             </a>
             <span style="background:rgba(231,182,188,0.25); color:#E7B6BC; font-size:0.75rem; padding:2px 8px; border-radius:4px; font-weight:600;">ADMIN</span>
         </div>
@@ -140,6 +140,7 @@ $adminScript = basename($_SERVER['PHP_SELF']);
             <li><a href="index.php" class="<?= $adminScript === 'index.php' ? 'active' : ''; ?>">Dashboard</a></li>
             <li><a href="products.php" class="<?= $adminScript === 'products.php' ? 'active' : ''; ?>">Products</a></li>
             <li><a href="categories.php" class="<?= $adminScript === 'categories.php' ? 'active' : ''; ?>">Categories</a></li>
+            <li><a href="pairings.php" class="<?= $adminScript === 'pairings.php' ? 'active' : ''; ?>">Pairings & Discounts</a></li>
             <li><a href="banners.php" class="<?= $adminScript === 'banners.php' ? 'active' : ''; ?>">Banners</a></li>
             <li><a href="orders.php" class="<?= $adminScript === 'orders.php' ? 'active' : ''; ?>">Orders</a></li>
             <li><a href="users.php" class="<?= $adminScript === 'users.php' ? 'active' : ''; ?>">Users</a></li>
