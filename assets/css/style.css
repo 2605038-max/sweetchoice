@@ -80,6 +80,26 @@
   --transition: all 0.22s ease-in-out;
 }
 
+/* Remove unwanted space at the top */
+html,
+body {
+    margin: 0;
+    padding: 0;
+}
+
+/* Remove spacing above the header */
+header,
+.navbar,
+.main-header {
+    margin-top: 0;
+    padding-top: 0;
+}
+
+/* Keep the header attached to the top */
+.hero-slider-section {
+    margin-top: 0;
+}
+
 /* ==================================================
    GLOBAL RESETS & BASE STYLES
 ================================================== */
@@ -187,46 +207,6 @@ h1, h2, h3, h4, h5, .brand-text {
   line-height: 1.6;
 }
 
-/* ==================================================
-   NAVIGATION & ANNOUNCEMENT BAR
-================================================== */
-.top-notice-bar {
-  background-color: var(--color-chocolate);
-  color: var(--color-bg);
-  font-size: 0.82rem;
-  padding: 8px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  letter-spacing: 0.2px;
-  position: relative;
-  z-index: 1001;
-}
-
-.top-notice-inner {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-}
-
-.top-notice-left {
-  font-weight: 500;
-  color: var(--color-bg);
-}
-
-.top-notice-right {
-  color: #D8C3B8;
-  font-size: 0.8rem;
-}
-
-.site-navbar {
-  background-color: var(--color-card-bg);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  border-bottom: 1px solid var(--color-border);
-  box-shadow: var(--shadow-sm);
-  transition: background-color 0.3s ease, border-bottom-color 0.3s ease, box-shadow 0.3s ease;
-}
 
 /* Homepage Transparent Navbar Overlay */
 body.page-home .site-navbar {
@@ -586,7 +566,7 @@ body.page-home .hero-slider-section {
 }
 
 /* ==================================================
-   HERO BANNER SLIDER
+  HERO BANNER SLIDER
 ================================================== */
 .hero-slider-section {
   position: relative;
@@ -634,6 +614,7 @@ body.page-home .hero-slider-section {
   left: 0;
   width: 100%;
   height: 100%;
+  display: block;
   object-fit: contain;
   object-position: center;
   z-index: 1;
@@ -655,13 +636,20 @@ body.page-home .hero-slider-section {
   pointer-events: none;
 }
 
+
 .slide-content {
   position: relative;
   z-index: 3;
-  max-width: 580px;
-  padding: 105px 36px 65px 36px;
-  margin-left: max(32px, calc((100% - 1200px) / 2 + 20px));
+
+  width: 100%;
+  max-width: 650px;
+
+  padding: 100px 36px 100px 0;
+  margin-left: max(5%, calc((100% - 1400px) / 2));
+
+  text-align: left;
 }
+
 
 .slide-atelier-badge {
   display: inline-block;
@@ -699,15 +687,20 @@ body.page-home .hero-slider-section {
   flex-wrap: wrap;
 }
 
+
 .slider-controls {
   position: absolute;
   bottom: 26px;
-  left: max(32px, calc((100% - 1200px) / 2 + 20px));
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 10;
+
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 12px;
 }
+
 
 .slider-arrow {
   width: 40px;

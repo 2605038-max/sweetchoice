@@ -9,13 +9,7 @@ $favCount = getFavoritesCount($pdo);
 $currentLang = getCurrentLang();
 ?>
 
-<!-- Announcement Notice Bar -->
-<div class="top-notice-bar">
-    <div class="container top-notice-inner">
-        <span class="top-notice-left"><?= isJapanese() ? '銀座アトリエより毎日手作り・焼きたてをお届けいたします' : 'Handmade daily at our Ginza boutique with pure Hokkaido dairy & Kyoto Uji matcha'; ?></span>
-        <span class="top-notice-right"><?= e(__('all_prices_jpy', 'All prices in Japanese Yen (¥ / JPY)')); ?></span>
-    </div>
-</div>
+
 
 <!-- Main Sticky Navbar -->
 <header class="site-navbar">
