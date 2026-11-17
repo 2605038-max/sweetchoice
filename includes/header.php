@@ -30,18 +30,25 @@ $pageTitle = isset($pageTitle) ? $pageTitle . ' | ' . __('brand_name', 'Sweet Ch
     <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="icon" type="image/png" href="../assets/images/logo_banner.jpg">
 </head>
-<body>
+<?php
+$currentScript = basename($_SERVER['PHP_SELF'] ?? '');
+$isHomePage = ($currentScript === 'index.php' && strpos($_SERVER['PHP_SELF'] ?? '', '/admin/') === false);
+$bodyClass = $isHomePage ? 'page-home' : 'page-inner';
+?>
+<body class="<?= $bodyClass; ?>">
 
 <?php require_once __DIR__ . '/navbar.php'; ?>
 
 <!-- Flash Messages Container -->
+<?php $flashes = getFlashes(); if (!empty($flashes)): ?>
 <div class="container flash-container">
-    <?php foreach (getFlashes() as $flash): ?>
+    <?php foreach ($flashes as $flash): ?>
         <div class="alert alert-<?= e($flash['type']); ?>">
             <span><?= e($flash['message']); ?></span>
             <button type="button" style="background:none;border:none;cursor:pointer;font-weight:bold;" onclick="this.parentElement.remove();">&times;</button>
         </div>
     <?php endforeach; ?>
 </div>
+<?php endif; ?>
 
 <main>

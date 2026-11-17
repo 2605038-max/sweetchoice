@@ -1,37 +1,49 @@
 /*
  * Sweet Choice - Artisanal Japanese Patisserie Brand Design System
  * 
- * Professional Brand Palette:
- *   --color-bg:               #F6F1E9 (Warm Ivory - Main Background)
- *   --color-text-primary:     #604638 (Espresso Brown - Primary Text & Brand Identity)
- *   --color-text-secondary:   #81736A (Warm Gray - Secondary Text & Details)
- *   --color-btn-primary:      #A66F55 (Terracotta - Primary Action Buttons)
- *   --color-btn-primary-hover:#8F5B43 (Deep Terracotta - Hover State)
- *   --color-accent-secondary: #D8C5A5 (Champagne Beige - Secondary Accents & Borders)
- *   --color-card-bg:          #FFFCF8 (Soft Cream - Card Backgrounds)
- *   --color-border:           #E8DDD0 (Soft Sand - Clean Tailored Borders)
- *   --color-border-light:     #F0E8DF (Subtle Sand - Dividers)
- *   --color-accent-natural:   #78816A (Sage Green - Natural Artisan Accents)
- *   --color-accent-natural-lt:#EEF1EB (Soft Sage Tint - Badges & Tags)
- *   --color-terracotta-lt:    #F9EFEA (Soft Terracotta Tint)
+ * Signature Brand Palette:
+ *   --color-bg:               #FAF6F0 (Warm Cream - Main Background)
+ *   --color-card-bg:          #FFFFFF (Soft White - Card Backgrounds)
+ *   --color-cream-soft:       #F5ECE3 (Warm Cream Tint - Accent Sections)
+ *   --color-text-primary:     #3D261D (Chocolate Brown - Primary Text & Brand Identity)
+ *   --color-text-secondary:   #705346 (Warm Cocoa - Secondary Text & Details)
+ *   --color-chocolate:        #3D261D (Rich Chocolate Brown)
+ *   --color-btn-primary:      #C47C85 (Dusty Rose - Primary Action Buttons & Accents)
+ *   --color-btn-primary-hover:#AD666F (Deep Dusty Rose - Hover State)
+ *   --color-dusty-rose:       #C47C85 (Dusty Rose Accent)
+ *   --color-dusty-rose-lt:    #FBF0F2 (Soft Dusty Rose Tint - Badges & Tags)
+ *   --color-dusty-rose-border:#E8C1C7 (Dusty Rose Border Tint)
+ *   --color-accent-secondary: #D4B29E (Rose Almond Beige - Secondary Accents & Borders)
+ *   --color-border:           #EBDCD2 (Warm Cream Border - Clean Tailored Borders)
+ *   --color-border-light:     #F4EAE2 (Subtle Cream Sand - Dividers)
+ *   --color-accent-natural:   #826E61 (Warm Cocoa Neutral)
+ *   --color-accent-natural-lt:#F5EFEB (Soft Warm Tint - Badges & Tags)
+ *   --color-terracotta-lt:    #FBF0F2 (Soft Rose Tint)
  */
 
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&family=Noto+Serif+JP:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
 
 :root {
-  /* Brand Color Palette */
-  --color-bg: #F6F1E9;
-  --color-text-primary: #604638;
-  --color-text-secondary: #81736A;
-  --color-btn-primary: #A66F55;
-  --color-btn-primary-hover: #8F5B43;
-  --color-accent-secondary: #D8C5A5;
-  --color-card-bg: #FFFCF8;
-  --color-border: #E8DDD0;
-  --color-border-light: #F0E8DF;
-  --color-accent-natural: #78816A;
-  --color-accent-natural-lt: #EEF1EB;
-  --color-terracotta-lt: #F9EFEA;
+  /* Brand Color Palette: Warm Cream, Chocolate Brown, Dusty Rose */
+  --color-bg: #FAF6F0;
+  --color-card-bg: #FFFFFF;
+  --color-cream-soft: #F5ECE3;
+  --color-text-primary: #3D261D;
+  --color-text-secondary: #705346;
+  --color-chocolate: #3D261D;
+  --color-chocolate-light: #5A3D31;
+  --color-btn-primary: #C47C85;
+  --color-btn-primary-hover: #AD666F;
+  --color-dusty-rose: #C47C85;
+  --color-dusty-rose-hover: #AD666F;
+  --color-dusty-rose-lt: #FBF0F2;
+  --color-dusty-rose-border: #E8C1C7;
+  --color-accent-secondary: #D4B29E;
+  --color-border: #EBDCD2;
+  --color-border-light: #F4EAE2;
+  --color-accent-natural: #826E61;
+  --color-accent-natural-lt: #F5EFEB;
+  --color-terracotta-lt: #FBF0F2;
   --color-white: #FFFFFF;
 
   /* Semantic Feedback Colors */
@@ -41,13 +53,12 @@
   --color-star: #C9934B;
 
   /* Backward Compatibility Aliases */
-  --color-cream: #E8DDD0;
-  --color-deep-text: #604638;
-  --color-secondary-text: #81736A;
-  --color-deep-plum: #A66F55;
-  --color-muted-plum: #A66F55;
-  --color-primary-pink: #D8C5A5;
-  --color-dusty-rose: #E8DDD0;
+  --color-cream: #FAF6F0;
+  --color-deep-text: #3D261D;
+  --color-secondary-text: #705346;
+  --color-deep-plum: #C47C85;
+  --color-muted-plum: #C47C85;
+  --color-primary-pink: #C47C85;
 
   /* Refined Tailored Radii (No Excessive Toy-like Roundedness) */
   --radius-xs: 3px;
@@ -56,11 +67,11 @@
   --radius-lg: 8px;
   --radius-full: 9999px;
 
-  /* Soft Natural Shadows */
-  --shadow-sm: 0 1px 3px rgba(96, 70, 56, 0.05);
-  --shadow-md: 0 4px 16px rgba(96, 70, 56, 0.07);
-  --shadow-lg: 0 10px 30px rgba(96, 70, 56, 0.10);
-  --shadow-hover: 0 8px 24px rgba(96, 70, 56, 0.12);
+  /* Soft Natural Shadows with Warm Chocolate Undertones */
+  --shadow-sm: 0 1px 3px rgba(61, 38, 29, 0.05);
+  --shadow-md: 0 4px 16px rgba(61, 38, 29, 0.07);
+  --shadow-lg: 0 10px 30px rgba(61, 38, 29, 0.10);
+  --shadow-hover: 0 8px 24px rgba(61, 38, 29, 0.12);
 
   /* Typography */
   --font-serif: 'Cormorant Garamond', 'Playfair Display', 'Noto Serif JP', Georgia, serif;
@@ -180,12 +191,14 @@ h1, h2, h3, h4, h5, .brand-text {
    NAVIGATION & ANNOUNCEMENT BAR
 ================================================== */
 .top-notice-bar {
-  background-color: #EFE8DF;
-  color: var(--color-text-primary);
+  background-color: var(--color-chocolate);
+  color: var(--color-bg);
   font-size: 0.82rem;
   padding: 8px 0;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   letter-spacing: 0.2px;
+  position: relative;
+  z-index: 1001;
 }
 
 .top-notice-inner {
@@ -197,10 +210,11 @@ h1, h2, h3, h4, h5, .brand-text {
 
 .top-notice-left {
   font-weight: 500;
+  color: var(--color-bg);
 }
 
 .top-notice-right {
-  color: var(--color-text-secondary);
+  color: #D8C3B8;
   font-size: 0.8rem;
 }
 
@@ -211,7 +225,38 @@ h1, h2, h3, h4, h5, .brand-text {
   z-index: 1000;
   border-bottom: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
-  transition: var(--transition);
+  transition: background-color 0.3s ease, border-bottom-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Homepage Transparent Navbar Overlay */
+body.page-home .site-navbar {
+  background-color: transparent;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow: none;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+body.page-home .site-navbar:not(.scrolled) .brand-text {
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6);
+}
+
+body.page-home .site-navbar:not(.scrolled) .nav-item a {
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
+  font-weight: 600;
+}
+
+body.page-home .site-navbar.scrolled {
+  background-color: rgba(250, 246, 240, 0.96);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom-color: var(--color-border);
+  box-shadow: 0 4px 18px rgba(61, 38, 29, 0.08);
+}
+
+body.page-home .hero-slider-section {
+  margin-top: -81px;
 }
 
 .nav-container {
@@ -315,7 +360,9 @@ h1, h2, h3, h4, h5, .brand-text {
   gap: 6px;
   font-size: 0.82rem;
   font-weight: 600;
-  background: #F2EAE1;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   padding: 5px 12px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--color-border);
@@ -342,7 +389,9 @@ h1, h2, h3, h4, h5, .brand-text {
   width: 42px;
   height: 42px;
   border-radius: var(--radius-sm);
-  background: #F7EFE7;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   color: var(--color-text-primary);
   position: relative;
   transition: var(--transition);
@@ -430,7 +479,7 @@ h1, h2, h3, h4, h5, .brand-text {
   background-color: var(--color-btn-primary-hover);
   border-color: var(--color-btn-primary-hover);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(166, 111, 85, 0.25);
+  box-shadow: 0 4px 14px rgba(196, 124, 133, 0.35);
 }
 
 .btn-secondary {
@@ -440,20 +489,20 @@ h1, h2, h3, h4, h5, .brand-text {
 }
 
 .btn-secondary:hover {
-  background-color: #EFE7DE;
-  border-color: var(--color-accent-secondary);
-  color: var(--color-text-primary) !important;
+  background-color: var(--color-dusty-rose-lt);
+  border-color: var(--color-btn-primary);
+  color: var(--color-btn-primary) !important;
   transform: translateY(-1px);
 }
 
 .btn-cream {
-  background-color: #EDE3D7;
+  background-color: var(--color-cream-soft);
   color: var(--color-text-primary) !important;
   border: 1px solid var(--color-border);
 }
 
 .btn-cream:hover {
-  background-color: #E2D5C6;
+  background-color: #EBDCD2;
 }
 
 .btn-sm {
@@ -542,9 +591,12 @@ h1, h2, h3, h4, h5, .brand-text {
 .hero-slider-section {
   position: relative;
   overflow: hidden;
-  background-color: #EDE5DC;
+  background-color: #FAF4F5;
   border-bottom: 1px solid var(--color-border);
-  width:100%;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 .slider-container {
@@ -552,6 +604,7 @@ h1, h2, h3, h4, h5, .brand-text {
   width: 100%;
   max-width: 100%;
   margin: 0;
+  padding: 0;
   overflow: hidden;
 }
 
@@ -559,15 +612,20 @@ h1, h2, h3, h4, h5, .brand-text {
   display: flex;
   transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
   width: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 .hero-slide {
   min-width: 100%;
-  width:100%;
+  width: 100%;
   position: relative;
   display: flex;
   align-items: center;
-  min-height: 520px;
+  aspect-ratio: 1967 / 799;
+  min-height: 480px;
+  background-color: #FAF4F5;
+  overflow: hidden;
 }
 
 .slide-bg-img {
@@ -576,7 +634,7 @@ h1, h2, h3, h4, h5, .brand-text {
   left: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   object-position: center;
   z-index: 1;
 }
@@ -587,41 +645,49 @@ h1, h2, h3, h4, h5, .brand-text {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, rgba(253, 253, 253, 0.95) 0%, rgba(253, 253, 253, 0.85) 40%, rgba(253, 253, 253, 0.3) 70%, rgba(253, 253, 253, 0) 100%);
+  background: linear-gradient(90deg, 
+    rgba(250, 246, 240, 0.92) 0%, 
+    rgba(250, 246, 240, 0.80) 34%, 
+    rgba(250, 246, 240, 0.25) 54%, 
+    rgba(250, 246, 240, 0) 72%
+  );
   z-index: 2;
+  pointer-events: none;
 }
 
 .slide-content {
   position: relative;
   z-index: 3;
-  max-width: 600px;
-  padding: 64px 36px;
+  max-width: 580px;
+  padding: 105px 36px 65px 36px;
+  margin-left: max(32px, calc((100% - 1200px) / 2 + 20px));
 }
 
 .slide-atelier-badge {
   display: inline-block;
-  background-color: var(--color-accent-natural-lt);
-  color: var(--color-accent-natural);
+  background-color: var(--color-dusty-rose-lt);
+  color: var(--color-dusty-rose-hover);
   font-size: 0.74rem;
   font-weight: 700;
-  letter-spacing: 2px;
-  padding: 4px 12px;
+  letter-spacing: 2.5px;
+  padding: 5px 14px;
   border-radius: var(--radius-sm);
   margin-bottom: 16px;
-  border: 1px solid rgba(120, 129, 106, 0.25);
+  border: 1px solid var(--color-dusty-rose-border);
 }
 
 .slide-title {
-  font-size: 2.85rem;
-  color: var(--color-text-primary);
+  font-family: var(--font-serif);
+  font-size: 3rem;
+  color: var(--color-chocolate);
   margin-bottom: 16px;
-  line-height: 1.18;
+  line-height: 1.15;
   font-weight: 600;
   letter-spacing: -0.5px;
 }
 
 .slide-subtitle {
-  font-size: 1.08rem;
+  font-size: 1.05rem;
   color: var(--color-text-secondary);
   margin-bottom: 28px;
   line-height: 1.65;
@@ -636,8 +702,8 @@ h1, h2, h3, h4, h5, .brand-text {
 .slider-controls {
   position: absolute;
   bottom: 26px;
-  left: 36px;
-  z-index: 4;
+  left: max(32px, calc((100% - 1200px) / 2 + 20px));
+  z-index: 10;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -646,14 +712,16 @@ h1, h2, h3, h4, h5, .brand-text {
 .slider-arrow {
   width: 40px;
   height: 40px;
-  background: rgba(255, 252, 248, 0.92);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 2px 8px rgba(61, 38, 29, 0.08);
   transition: var(--transition);
   font-size: 1.1rem;
   color: var(--color-text-primary);
@@ -663,6 +731,7 @@ h1, h2, h3, h4, h5, .brand-text {
   background: var(--color-btn-primary);
   color: #fff;
   border-color: var(--color-btn-primary);
+  transform: translateY(-1px);
 }
 
 .slider-dots {
@@ -674,15 +743,16 @@ h1, h2, h3, h4, h5, .brand-text {
 .slider-dot {
   width: 10px;
   height: 10px;
-  border-radius: var(--radius-sm);
-  background: rgba(129, 115, 106, 0.35);
+  border-radius: var(--radius-full);
+  background: rgba(112, 83, 70, 0.3);
   cursor: pointer;
   transition: var(--transition);
 }
 
 .slider-dot.active {
-  width: 24px;
+  width: 26px;
   background: var(--color-btn-primary);
+  border-radius: var(--radius-sm);
 }
 
 /* ==================================================
@@ -780,7 +850,7 @@ h1, h2, h3, h4, h5, .brand-text {
   width: 100%;
   height: 210px;
   overflow: hidden;
-  background-color: #EDE5DC;
+  background-color: var(--color-cream-soft);
 }
 
 .product-img-link {
@@ -969,7 +1039,7 @@ h1, h2, h3, h4, h5, .brand-text {
   position: relative;
   height: 190px;
   overflow: hidden;
-  background-color: #EDE5DC;
+  background-color: var(--color-cream-soft);
 }
 
 .collection-img-wrap img {
@@ -1097,8 +1167,8 @@ h1, h2, h3, h4, h5, .brand-text {
 }
 
 .ai-pill:hover {
-  border-color: var(--color-accent-secondary);
-  background: #EDE4DA;
+  border-color: var(--color-btn-primary);
+  background: var(--color-dusty-rose-lt);
 }
 
 .ai-pill.active {
@@ -1279,7 +1349,7 @@ h1, h2, h3, h4, h5, .brand-text {
 ================================================== */
 .pairings-showcase-section {
   padding: 72px 0;
-  background-color: #EFE7DE;
+  background-color: var(--color-cream-soft);
   border-top: 1px solid var(--color-border);
   border-bottom: 1px solid var(--color-border);
 }
@@ -1358,7 +1428,7 @@ h1, h2, h3, h4, h5, .brand-text {
   overflow: hidden;
   margin-bottom: 10px;
   border: 1px solid var(--color-border);
-  background: #EDE5DC;
+  background: var(--color-cream-soft);
 }
 
 .pairing-item-thumb img {
@@ -1567,7 +1637,7 @@ h1, h2, h3, h4, h5, .brand-text {
    FOOTER
 ================================================== */
 .site-footer {
-  background-color: #EFE7DE;
+  background-color: var(--color-cream-soft);
   border-top: 1px solid var(--color-border);
   padding: 64px 0 28px 0;
   margin-top: auto;
@@ -1719,7 +1789,7 @@ h1, h2, h3, h4, h5, .brand-text {
   overflow: hidden;
   box-shadow: var(--shadow-sm);
   border: 1px solid var(--color-border);
-  background-color: #EDE5DC;
+  background-color: var(--color-cream-soft);
 }
 
 .product-gallery-main img {
@@ -1863,7 +1933,8 @@ h1, h2, h3, h4, h5, .brand-text {
 }
 
 .qty-btn:hover {
-  background: #EDE4DA;
+  background: var(--color-dusty-rose-lt);
+  color: var(--color-btn-primary);
 }
 
 .qty-input {
@@ -2050,6 +2121,12 @@ h1, h2, h3, h4, h5, .brand-text {
   padding: 14px 0 0 0;
 }
 
+.flash-container:empty {
+  display: none;
+  padding: 0;
+  margin: 0;
+}
+
 .alert {
   padding: 12px 18px;
   border-radius: var(--radius-sm);
@@ -2146,9 +2223,6 @@ h1, h2, h3, h4, h5, .brand-text {
   .slide-title {
     font-size: 2.15rem;
   }
-  .slide-content {
-    padding: 40px 20px;
-  }
   .ai-selection-card,
   .ai-result-card-wrapper {
     padding: 24px 18px;
@@ -2169,23 +2243,28 @@ h1, h2, h3, h4, h5, .brand-text {
     align-items: flex-start;
   }
   .hero-slide {
-    min-height: 440px;
+    aspect-ratio: auto;
+    min-height: 480px;
   }
-  .slide-content {
-    margin-left: 0;
-    padding: 40px 20px 60px 20px;
-    max-width: 100%;
-  }
-  .hero-slide {
-    min-height: 440px;
-  }
-  .slide-content {
-    margin-left: 0;
-    padding: 40px 20px 60px 20px;
-    max-width: 100%;
+  .slide-bg-img {
+    object-fit: cover;
+    object-position: 70% center;
   }
   .slide-overlay {
-    background: linear-gradient(180deg, rgba(253, 253, 253, 0.94) 0%, rgba(253, 253, 253, 0.8) 100%);
+    background: linear-gradient(180deg, 
+      rgba(250, 246, 240, 0.88) 0%, 
+      rgba(250, 246, 240, 0.94) 55%, 
+      rgba(250, 246, 240, 0.5) 100%
+    );
+  }
+  .slide-content {
+    margin-left: 0;
+    padding: 95px 20px 50px 20px;
+    max-width: 100%;
+  }
+  .slider-controls {
+    left: 20px;
+    bottom: 16px;
   }
   .footer-grid {
     grid-template-columns: 1fr;

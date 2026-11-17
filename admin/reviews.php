@@ -84,9 +84,9 @@ $reviews = $pdo->query("SELECT r.*, p.name_en AS product_name, u.name AS user_na
                                     <a href="reviews.php?action=approve&id=<?= $rev['id']; ?>&csrf_token=<?= getCsrfToken(); ?>" class="btn btn-primary btn-sm" style="padding:4px 8px; font-size:0.75rem;">Approve</a>
                                 <?php endif; ?>
                                 <a href="reviews.php?action=delete&id=<?= $rev['id']; ?>&csrf_token=<?= getCsrfToken(); ?>" 
-                                   class="btn btn-secondary btn-sm" 
-                                   style="padding:4px 8px; font-size:0.75rem; color:var(--color-danger);"
-                                   onclick="return confirm('Delete this review?');">Delete</a>
+                                class="btn btn-secondary btn-sm" 
+                                style="padding:4px 8px; font-size:0.75rem; color:var(--color-danger);"
+                                onclick="return confirm('Delete this review?');">Delete</a>
                             </div>
                         </td>
                     </tr>

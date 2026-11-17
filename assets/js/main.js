@@ -162,4 +162,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
         });
     });
+
+    // 6. Header Scroll Transition (Transparent to Solid on homepage)
+    const siteNavbar = document.querySelector('.site-navbar');
+    if (siteNavbar && document.body.classList.contains('page-home')) {
+        const handleScroll = () => {
+            if (window.scrollY > 40) {
+                siteNavbar.classList.add('scrolled');
+            } else {
+                siteNavbar.classList.remove('scrolled');
+            }
+        };
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        handleScroll();
+    }
 });
