@@ -78,8 +78,8 @@ function getCategoryPairings(PDO $pdo, bool $isDrinkCategory, int $limit = 4): a
             FROM products p
             JOIN categories c ON p.category_id = c.id
             WHERE c.slug != 'drinks'
-              AND p.availability != 'sold_out'
-              AND p.stock > 0
+            AND p.availability != 'sold_out'
+            AND p.stock > 0
             ORDER BY p.is_popular DESC, p.stock DESC, p.id ASC
             LIMIT ?
         ";
@@ -90,8 +90,8 @@ function getCategoryPairings(PDO $pdo, bool $isDrinkCategory, int $limit = 4): a
             FROM products p
             JOIN categories c ON p.category_id = c.id
             WHERE c.slug = 'drinks'
-              AND p.availability != 'sold_out'
-              AND p.stock > 0
+            AND p.availability != 'sold_out'
+            AND p.stock > 0
             ORDER BY p.is_popular DESC, p.stock DESC, p.id ASC
             LIMIT ?
         ";
@@ -127,16 +127,16 @@ function getProductPairings(PDO $pdo, int $productId, int $limit = 4): array {
     // Fetch administrator-defined pairings first
     $stmt = $pdo->prepare("
         SELECT pp.id AS pairing_id, pp.custom_discount_percent, pp.sort_order,
-               p.id, p.category_id, p.name_en, p.name_ja, p.description_en, p.description_ja,
-               p.price, p.image, p.stock, p.availability, p.is_popular,
-               c.slug AS category_slug, c.name_en AS category_name_en, c.name_ja AS category_name_ja
+            p.id, p.category_id, p.name_en, p.name_ja, p.description_en, p.description_ja,
+            p.price, p.image, p.stock, p.availability, p.is_popular,
+            c.slug AS category_slug, c.name_en AS category_name_en, c.name_ja AS category_name_ja
         FROM product_pairings pp
         JOIN products p ON pp.paired_product_id = p.id
         JOIN categories c ON p.category_id = c.id
         WHERE pp.product_id = ? 
-          AND pp.is_active = 1 
-          AND p.availability != 'sold_out' 
-          AND p.stock > 0
+        AND pp.is_active = 1 
+        AND p.availability != 'sold_out' 
+        AND p.stock > 0
         ORDER BY pp.sort_order ASC, p.is_popular DESC, p.stock DESC
         LIMIT ?
     ");
@@ -156,15 +156,15 @@ function getProductPairings(PDO $pdo, int $productId, int $limit = 4): array {
             // Main is drink -> find desserts (category_id != 8)
             $fallbackSql = "
                 SELECT NULL AS pairing_id, NULL AS custom_discount_percent, 99 AS sort_order,
-                       p.id, p.category_id, p.name_en, p.name_ja, p.description_en, p.description_ja,
-                       p.price, p.image, p.stock, p.availability, p.is_popular,
-                       c.slug AS category_slug, c.name_en AS category_name_en, c.name_ja AS category_name_ja
+                    p.id, p.category_id, p.name_en, p.name_ja, p.description_en, p.description_ja,
+                    p.price, p.image, p.stock, p.availability, p.is_popular,
+                    c.slug AS category_slug, c.name_en AS category_name_en, c.name_ja AS category_name_ja
                 FROM products p
                 JOIN categories c ON p.category_id = c.id
                 WHERE c.slug != 'drinks'
-                  AND p.id NOT IN ($placeholders)
-                  AND p.availability != 'sold_out'
-                  AND p.stock > 0
+                AND p.id NOT IN ($placeholders)
+                AND p.availability != 'sold_out'
+                AND p.stock > 0
                 ORDER BY p.is_popular DESC, p.stock DESC, p.id ASC
                 LIMIT $needed
             ";
@@ -172,15 +172,15 @@ function getProductPairings(PDO $pdo, int $productId, int $limit = 4): array {
             // Main is dessert -> find drinks (category_id = 8)
             $fallbackSql = "
                 SELECT NULL AS pairing_id, NULL AS custom_discount_percent, 99 AS sort_order,
-                       p.id, p.category_id, p.name_en, p.name_ja, p.description_en, p.description_ja,
-                       p.price, p.image, p.stock, p.availability, p.is_popular,
-                       c.slug AS category_slug, c.name_en AS category_name_en, c.name_ja AS category_name_ja
+                    p.id, p.category_id, p.name_en, p.name_ja, p.description_en, p.description_ja,
+                    p.price, p.image, p.stock, p.availability, p.is_popular,
+                    c.slug AS category_slug, c.name_en AS category_name_en, c.name_ja AS category_name_ja
                 FROM products p
                 JOIN categories c ON p.category_id = c.id
                 WHERE c.slug = 'drinks'
-                  AND p.id NOT IN ($placeholders)
-                  AND p.availability != 'sold_out'
-                  AND p.stock > 0
+                AND p.id NOT IN ($placeholders)
+                AND p.availability != 'sold_out'
+                AND p.stock > 0
                 ORDER BY p.is_popular DESC, p.stock DESC, p.id ASC
                 LIMIT $needed
             ";
@@ -278,7 +278,7 @@ function revalidateCartPairingDiscounts(PDO $pdo, int $cartId): void {
 
     $stmt = $pdo->prepare("
         SELECT ci.id, ci.product_id, ci.pairing_product_id, ci.discount_percent, ci.discount_amount,
-               p.price, p.stock, p.availability
+            p.price, p.stock, p.availability
         FROM cart_items ci
         JOIN products p ON ci.product_id = p.id
         WHERE ci.cart_id = ? AND ci.pairing_product_id IS NOT NULL

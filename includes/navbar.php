@@ -11,9 +11,9 @@ $currentLang = getCurrentLang();
 
 <!-- Announcement Notice Bar -->
 <div class="top-notice-bar">
-    <div class="container" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-        <span> <?= isJapanese() ? '銀座本店より毎日手作り・焼きたてをお届けいたします。' : 'Handmade daily at our Ginza boutique with pure Hokkaido dairy & Kyoto matcha.'; ?></span>
-        <span><?= e(__('all_prices_jpy', 'All prices in Japanese Yen (¥ / JPY)')); ?></span>
+    <div class="container top-notice-inner">
+        <span class="top-notice-left"><?= isJapanese() ? '銀座アトリエより毎日手作り・焼きたてをお届けいたします' : 'Handmade daily at our Ginza boutique with pure Hokkaido dairy & Kyoto Uji matcha'; ?></span>
+        <span class="top-notice-right"><?= e(__('all_prices_jpy', 'All prices in Japanese Yen (¥ / JPY)')); ?></span>
     </div>
 </div>
 
@@ -22,8 +22,10 @@ $currentLang = getCurrentLang();
     <div class="container nav-container">
         <!-- Brand Logo -->
         <a href="index.php" class="brand-wrapper">
-        
-            <div class="brand-text">Sweet <span>Choice</span></div>
+            <div class="brand-identity">
+                <span class="brand-text">Sweet Choice</span>
+                <span class="brand-subtext">ATELIER GINZA</span>
+            </div>
         </a>
 
         <!-- Desktop Navigation Links -->
@@ -38,7 +40,7 @@ $currentLang = getCurrentLang();
                 <a href="favorites.php">
                     <?= e(__('nav_favorites', 'Favorites')); ?>
                     <?php if ($favCount > 0): ?>
-                        <span class="badge badge-limited fav-counter" style="margin-left:4px;"><?= $favCount; ?></span>
+                        <span class="fav-counter"><?= $favCount; ?></span>
                     <?php endif; ?>
                 </a>
             </li>
@@ -51,7 +53,7 @@ $currentLang = getCurrentLang();
                 </li>
                 <?php if (isAdmin()): ?>
                     <li class="nav-item">
-                        <a href="../admin/index.php" style="color:var(--color-deep-plum); font-weight:700;">★ <?= e(__('nav_admin', 'Admin Panel')); ?></a>
+                        <a href="../admin/index.php" class="nav-admin-link"><?= e(__('nav_admin', 'Admin Panel')); ?></a>
                     </li>
                 <?php endif; ?>
                 <li class="nav-item">
@@ -69,13 +71,17 @@ $currentLang = getCurrentLang();
             <!-- Language Switcher: EN | 日本語 -->
             <div class="lang-switch">
                 <a href="?lang=en" class="<?= $currentLang === 'en' ? 'active' : ''; ?>">EN</a>
-                <span>|</span>
-                <a href="?lang=ja" class="<?= $currentLang === 'ja' ? 'active' : ''; ?>">日本語</a>
+                <span class="lang-divider">/</span>
+                <a href="?lang=ja" class="<?= $currentLang === 'ja' ? 'active' : ''; ?>">JA</a>
             </div>
 
             <!-- Cart Icon with dynamic counter -->
-            <a href="cart.php" class="nav-btn-icon" title="<?= e(__('nav_cart', 'Cart')); ?>">
-            🛒
+            <a href="cart.php" class="nav-btn-icon" title="<?= e(__('nav_cart', 'Cart')); ?>" aria-label="<?= e(__('nav_cart', 'Cart')); ?>">
+                <svg class="cart-icon-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                </svg>
                 <?php if ($cartCount > 0): ?>
                     <span class="badge-counter"><?= $cartCount; ?></span>
                 <?php endif; ?>
