@@ -1,0 +1,8 @@
+{
+  "name": "Sweet Run - 3D Candy Endless Runner",
+  "description": "An original 3D candy endless runner game featuring custom articulated characters, multi-lane controls, cake monsters, delicious treats, and dynamic obstacles.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

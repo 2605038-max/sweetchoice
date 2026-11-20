@@ -41,6 +41,12 @@ $currentLang = getCurrentLang();
             <li class="nav-item <?= $currentScript === 'orders.php' ? 'active' : ''; ?>">
                 <a href="orders.php"><?= e(__('nav_orders', 'Orders')); ?></a>
             </li>
+            <!-- Mini Game Navigation Item(new) -->
+            <li class="nav-item">
+                <a href="game/index.html" class="nav-game-link" title="<?= isJapanese() ? '走るケーキゲームで遊ぶ' : 'Play Running Cake Game'; ?>">
+                    <span style="margin-right: 4px;">🎮</span><?= isJapanese() ? 'ミニゲーム' : 'Mini Game'; ?>
+                </a>
+            </li>
             <?php if (isLoggedIn()): ?>
                 <li class="nav-item <?= $currentScript === 'account.php' ? 'active' : ''; ?>">
                     <a href="account.php"><?= e(__('nav_account', 'My Account')); ?></a>
