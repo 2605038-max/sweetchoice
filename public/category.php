@@ -180,16 +180,16 @@ $categoryPairings = getCategoryPairings($pdo, $isDrinkCategory, 4);
 
                         <div class="product-footer">
                             <div class="product-price"><?= formatPrice($prod['price']); ?></div>
-                            <div style="display:flex; gap:8px;">
+                            <div style="display:flex; align-items:center; gap:8px;">
                                 <a href="product.php?id=<?= $prod['id']; ?>" class="btn btn-secondary btn-sm"><?= e(__('view_details', 'Details')); ?></a>
                                 <?php if ($isSoldOut): ?>
                                     <span class="badge badge-sold-out" style="align-self:center;"><?= e(__('out_of_stock', 'Sold Out')); ?></span>
                                 <?php else: ?>
-                                    <form action="cart.php" method="POST" style="margin:0;">
+                                    <form action="cart.php" method="POST" style="margin:0; display:inline-flex;">
                                         <input type="hidden" name="action" value="add">
                                         <input type="hidden" name="product_id" value="<?= $prod['id']; ?>">
                                         <input type="hidden" name="quantity" value="1">
-                                        <button type="submit" class="btn btn-primary btn-sm"><?= e(__('quick_add', '+ Cart')); ?></button>
+                                        <button type="submit" class="btn btn-primary btn-sm"><?= e(__('quick_add', 'Add')); ?></button>
                                     </form>
                                 <?php endif; ?>
                             </div>

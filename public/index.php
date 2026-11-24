@@ -418,19 +418,18 @@ if ($remainingSlots > 0) {
     </div>
 </section>
 
-<!-- 4. Smart Dessert Recommendations (AI Sommelier) -->
+<!-- 4. Smart Dessert Recommendations -->
 <section class="ai-recommendation-section" id="ai-recommendation-section"
-    data-lang-view-details="<?= e(__('view_details', 'View Details')); ?>"
+    data-lang-view-details="<?= e(__('view_details', 'Details')); ?>"
     data-lang-add-to-cart="<?= e(__('add_to_cart', 'Add to Cart')); ?>"
     data-lang-sold-out="<?= e(__('out_of_stock', 'Sold Out')); ?>"
-    data-lang-ai-sommelier="AI Sommelier"
     data-lang-loading="<?= e(__('ai_loading', 'Analyzing flavor profiles & pairing desserts...')); ?>"
     data-lang-choose-again="<?= isJapanese() ? 'もう一度選ぶ' : 'Choose Again'; ?>"
     data-lang-no-match="<?= isJapanese() ? '条件に一致するデザートが見つかりませんでした。別の気分や味を選んでみてください！' : 'No desserts found matching this pairing. Try another mood or flavor!'; ?>">
     
     <div class="container ai-section-container">
         <div class="section-header">
-            <span class="section-tag section-tag-natural"><?= e(__('ai_section_badge', 'Interactive AI Sommelier')); ?></span>
+            <span class="section-tag section-tag-natural"><?= e(__('ai_section_badge', 'Personalized Dessert Finder')); ?></span>
             <h2 class="section-title"><?= e(__('ai_title', 'What are you craving today?')); ?></h2>
             <p class="section-subtitle"><?= e(__('ai_subtitle', 'Select your current mood and favorite flavor note to get an instant tailored recommendation.')); ?></p>
         </div>
@@ -640,7 +639,7 @@ if ($remainingSlots > 0) {
                         <div class="product-footer">
                             <div class="product-price"><?= formatPrice($seasonProd['price']); ?></div>
                             <a href="product.php?id=<?= $seasonProd['id']; ?>" class="btn btn-primary btn-sm">
-                                <?= e(__('view_details', 'View Details')); ?>
+                                <?= e(__('view_details', 'Details')); ?>
                             </a>
                         </div>
                     </div>

@@ -101,12 +101,12 @@ $translations = [
         'seasonal_title' => 'Seasonal Special Collection',
         'seasonal_subtitle' => 'Limited-edition treats for seasonal events and celebrations',
         'view_all' => 'View All',
-        'view_details' => 'View Details',
+        'view_details' => 'Details',
         'add_to_cart' => 'Add to Cart',
         'out_of_stock' => 'Sold Out',
         'limited_stock' => 'Limited',
         'available' => 'Available',
-        'quick_add' => 'Quick Add',
+        'quick_add' => 'Add',
 
         // AI Recommendation
         'ai_section_badge' => 'PERSONALIZED DESSERT FINDER',
@@ -330,12 +330,12 @@ $translations = [
         'seasonal_title' => '季節の限定コレクション',
         'seasonal_subtitle' => '季節のイベントやお祝いを彩る限定スイーツ',
         'view_all' => 'すべて見る',
-        'view_details' => '詳細を見る',
+        'view_details' => '詳細',
         'add_to_cart' => 'カートに入れる',
         'out_of_stock' => '売り切れ',
         'limited_stock' => '残りわずか',
         'available' => '販売中',
-        'quick_add' => '簡単追加',
+        'quick_add' => '追加',
 
         // AI Recommendation
         'ai_section_badge' => 'ぴったりスイーツ探し',
