@@ -25,6 +25,11 @@ if (!$order) {
     exit;
 }
 
+// If qualifying order (>= 3000), set as active verified order for mini-game campaign
+if ((int)$order['grand_total'] >= 3000 && $order['status'] !== 'Cancelled') {
+    $_SESSION['verified_order_number'] = $order['order_number'];
+}
+
 // Fetch order items
 $itemsStmt = $pdo->prepare("SELECT oi.*, p.image FROM order_items oi 
                             LEFT JOIN products p ON oi.product_id = p.id 
@@ -53,6 +58,24 @@ require_once __DIR__ . '/../includes/header.php';
             <span><?= renderOrderStatusBadge($order['status']); ?></span>
         </div>
     </div>
+
+    <?php if ((int)$order['grand_total'] >= 3000 && $order['status'] !== 'Cancelled'): ?>
+        <!-- Mini Game Campaign Banner -->
+        <div style="background: linear-gradient(135deg, #FFF9F5 0%, #FFF2EC 100%); border: 2px dashed #E59A84; border-radius: 16px; padding: 24px 20px; text-align: center; margin-bottom: 30px; box-shadow: 0 4px 16px rgba(166, 111, 85, 0.12);">
+            <div style="font-size: 2.2rem; margin-bottom: 6px;">🎂 🏃 🎁</div>
+            <h3 style="font-size: 1.35rem; color: #8C3E26; font-weight: 800; margin-bottom: 8px; font-family: 'Playfair Display', serif;">
+                <?= isJapanese() ? '【¥3,000以上ご購入者限定】特製ミニケーキ チャレンジ！' : '【Exclusive Bonus】Mini Cake Game Challenge!'; ?>
+            </h3>
+            <p style="color: #604638; font-size: 0.94rem; max-width: 620px; margin: 0 auto 16px auto; line-height: 1.6;">
+                <?= isJapanese() 
+                    ? 'Sweet Choice で¥3,000以上お買い上げいただいたお客様への特別プレゼント！<br>走るケーキゲーム（Sweet Run）で<strong>2,000点</strong>を達成すると、本注文（#' . e($order['order_number']) . '）に<strong>「パティシエ特製ミニケーキ（無料 ¥0）」</strong>を自動追加いたします！（最大3回挑戦可能）' 
+                    : 'As a thank-you for your purchase of ¥3,000 or more, score 2,000 points in Sweet Run to get a Free Mini Artisan Cake (¥0) added to your order (#' . e($order['order_number']) . ')!'; ?>
+            </p>
+            <a href="game/index.html?order=<?= urlencode($order['order_number']); ?>" class="btn" style="background: #A66F55; color: #FFFFFF; font-weight: 800; padding: 12px 28px; border-radius: 25px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-size: 1rem; box-shadow: 0 4px 14px rgba(166, 111, 85, 0.35); transition: transform 0.2s ease;">
+                🍰 <?= isJapanese() ? '今すぐミニゲームに挑戦する（残り 3/3回）' : 'Play Sweet Run Now (3 tries)'; ?> &rarr;
+            </a>
+        </div>
+    <?php endif; ?>
 
     <!-- Receipt Details Card -->
     <div style="background:#FFFFFF; border:1px solid var(--color-border); border-radius:var(--radius-md); padding:30px; box-shadow:var(--shadow-sm); margin-bottom:30px;">

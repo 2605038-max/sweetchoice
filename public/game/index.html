@@ -9,46 +9,1254 @@
   <meta property="og:description" content="An original 3D candy endless runner game featuring custom articulated characters, multi-lane controls, cake monsters, delicious treats, and dynamic obstacles.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Noto+Sans+JP:wght@500;700;800&display=swap" rel="stylesheet">
   <script type="module" crossorigin src="./dist/assets/index-D0Zo_R6P.js"></script>
   <link rel="stylesheet" crossorigin href="./dist/assets/index-B5D_26jb.css">
   <style>
-    /* Floating Return to Shop button */
-    .back-to-shop-floating {
+    /* ==========================================================================
+       SWEET CHOICE - RESPONSIVE HEADER BAR & 2,000 PTS CAMPAIGN REWARD STYLES
+       ========================================================================== */
+
+    /* 1. Unified Game Top Bar (Flex container - prevents any button overlapping) */
+    .game-top-bar {
       position: fixed;
-      top: 16px;
-      left: 16px;
-      z-index: 999999;
-      background: rgba(255, 252, 248, 0.94);
+      top: 74px; /* Sits comfortably below the Score & Treats badges (top: 18px) */
+      left: 20px;
+      right: 20px;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      pointer-events: none; /* Let canvas touches pass through whitespace */
+    }
+
+    .game-top-bar > * {
+      pointer-events: auto; /* Buttons remain clickable */
+    }
+
+    .back-to-shop-btn {
+      background: rgba(255, 252, 248, 0.95);
       color: #604638;
-      border: 1px solid #E8DDD0;
-      padding: 8px 16px;
-      border-radius: 6px;
-      font-size: 0.88rem;
-      font-weight: 600;
+      border: 1.5px solid #E8DDD0;
+      padding: 7px 15px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 700;
       text-decoration: none;
-      box-shadow: 0 4px 14px rgba(96, 70, 56, 0.16);
+      box-shadow: 0 4px 12px rgba(96, 70, 56, 0.14);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
-      transition: all 0.22s ease;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       display: inline-flex;
       align-items: center;
       gap: 6px;
+      transition: all 0.2s ease;
+      font-family: 'Plus Jakarta Sans', 'Noto Sans JP', sans-serif;
+      cursor: pointer;
+      white-space: nowrap;
     }
-    .back-to-shop-floating:hover {
+
+    .back-to-shop-btn:hover {
       background: #A66F55;
       color: #FFFFFF;
       border-color: #A66F55;
       transform: translateY(-1px);
-      box-shadow: 0 6px 18px rgba(166, 111, 85, 0.28);
+      box-shadow: 0 6px 16px rgba(166, 111, 85, 0.28);
+    }
+
+    /* Campaign Info Pill Button */
+    .campaign-pill-btn {
+      background: rgba(255, 255, 255, 0.96);
+      color: #8A4E38;
+      border: 1.5px solid #F0C2B2;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.80rem;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(230, 80, 140, 0.15);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      font-family: 'Plus Jakarta Sans', 'Noto Sans JP', sans-serif;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .campaign-pill-btn:hover {
+      background: #FFF4F1;
+      border-color: #A66F55;
+      transform: translateY(-1px);
+    }
+
+    .campaign-pill-badge {
+      background: #A66F55;
+      color: #FFFFFF;
+      font-size: 0.68rem;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+    }
+
+    .campaign-pill-badge.qualified {
+      background: #2B8A3E;
+    }
+
+    .attempts-badge {
+      background: #E8590C;
+      color: #FFFFFF;
+      font-size: 0.70rem;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+    }
+
+    .attempts-badge.exhausted {
+      background: #868E96;
+    }
+
+    .attempts-badge.claimed {
+      background: #2B8A3E;
+    }
+
+    /* Mobile adjustments for max-width: 480px */
+    @media (max-width: 480px) {
+      .game-top-bar {
+        top: 68px;
+        left: 10px;
+        right: 10px;
+        gap: 6px;
+      }
+      .back-to-shop-btn,
+      .campaign-pill-btn {
+        font-size: 0.72rem;
+        padding: 5px 10px;
+        gap: 4px;
+      }
+      .campaign-pill-text-long {
+        display: none;
+      }
+      .campaign-pill-text-short {
+        display: inline;
+      }
+    }
+    @media (min-width: 481px) {
+      .campaign-pill-text-short {
+        display: none;
+      }
+    }
+
+    /* 2. In-Game 2,000 Point Milestone Celebration Pop-up */
+    .milestone-banner {
+      position: fixed;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-120%);
+      background: linear-gradient(135deg, #FF6B8B 0%, #FF8E53 100%);
+      color: #FFFFFF;
+      padding: 12px 28px;
+      border-radius: 30px;
+      font-size: 1.15rem;
+      font-weight: 800;
+      box-shadow: 0 8px 24px rgba(255, 107, 139, 0.45);
+      z-index: 999999;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      font-family: 'Fredoka', 'Noto Sans JP', sans-serif;
+      border: 2px solid #FFFFFF;
+      word-break: keep-all;
+    }
+
+    .milestone-banner.active {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* 3. Campaign Details & Verification Modal */
+    .campaign-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(60, 38, 29, 0.65);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 20000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .campaign-modal-overlay.open {
+      display: flex;
+    }
+
+    .campaign-modal-card {
+      background: #FFFCF8;
+      border: 2px solid #E8DDD0;
+      border-radius: 20px;
+      max-width: 480px;
+      width: 100%;
+      padding: 26px 22px;
+      box-shadow: 0 16px 40px rgba(60, 38, 29, 0.25);
+      position: relative;
+      font-family: 'Plus Jakarta Sans', 'Noto Sans JP', sans-serif;
+      color: #604638;
+      animation: popScale 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .modal-close-btn {
+      position: absolute;
+      top: 14px;
+      right: 16px;
+      background: none;
+      border: none;
+      font-size: 1.4rem;
+      cursor: pointer;
+      color: #81736A;
+      line-height: 1;
+      padding: 4px;
+    }
+    .modal-close-btn:hover {
+      color: #A66F55;
+    }
+
+    .campaign-modal-title {
+      font-size: 1.22rem;
+      font-weight: 800;
+      color: #4A3528;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      word-break: keep-all;
+    }
+
+    .campaign-modal-subtitle {
+      font-size: 0.86rem;
+      color: #81736A;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    .campaign-rule-box {
+      background: #FAF5EE;
+      border: 1px solid #E8DDD0;
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 18px;
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+
+    .campaign-rule-box ul {
+      margin-left: 20px;
+      margin-top: 6px;
+    }
+
+    .status-check-box {
+      background: #FFFFFF;
+      border: 1.5px solid #E8DDD0;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 18px;
+    }
+
+    .status-badge-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .verify-input-group {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .verify-input {
+      flex: 1;
+      padding: 9px 12px;
+      border: 1px solid #D8C5A5;
+      border-radius: 6px;
+      font-size: 0.86rem;
+      font-family: inherit;
+      color: #604638;
+      outline: none;
+    }
+
+    .verify-input:focus {
+      border-color: #A66F55;
+      box-shadow: 0 0 0 2px rgba(166, 111, 85, 0.15);
+    }
+
+    .verify-btn {
+      background: #A66F55;
+      color: #FFFFFF;
+      border: none;
+      padding: 9px 16px;
+      border-radius: 6px;
+      font-size: 0.86rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.18s ease;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+
+    .verify-btn:hover {
+      background: #8F5B43;
+    }
+
+    /* 4. Game Over Reward Card with Automatic Order Addition */
+    .gameover-reward-banner {
+      background: linear-gradient(135deg, #FFF9F5 0%, #FFF2EC 100%);
+      border: 2px dashed #E59A84;
+      border-radius: 16px;
+      padding: 18px 18px;
+      margin: 16px 0 16px 0;
+      text-align: center;
+      animation: popIn 0.3s ease;
+    }
+
+    .gameover-reward-banner.exhausted-banner {
+      background: linear-gradient(135deg, #FAF7F5 0%, #F5EFEA 100%);
+      border: 2px dashed #D3C5BC;
+    }
+
+    .gameover-reward-banner.won-banner {
+      background: linear-gradient(135deg, #F6FFF3 0%, #EDF9EA 100%);
+      border: 2px dashed #7BC676;
+    }
+
+    .reward-banner-crown {
+      font-size: 1.6rem;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    /* Enforce word-break: keep-all so Japanese doesn't split mid-word like プレゼン / ト */
+    .reward-banner-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #8C3E26;
+      margin-bottom: 6px;
+      font-family: 'Fredoka', 'Noto Sans JP', sans-serif;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+      line-height: 1.4;
+    }
+
+    .reward-banner-desc {
+      font-size: 0.86rem;
+      color: #5A3E31;
+      line-height: 1.55;
+      margin-bottom: 14px;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+    }
+
+    .reward-confirmed-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #EBF7E7;
+      color: #265B1D;
+      border: 1px solid #B8E4AE;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      margin-bottom: 14px;
+      word-break: keep-all;
+    }
+
+    .reward-exhausted-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #F1EAE5;
+      color: #7A5B4D;
+      border: 1px solid #D8C5BA;
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 0.80rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      word-break: keep-all;
+    }
+
+    .reward-modal-actions {
+      display: flex;
+      gap: 10px;
+      flex-direction: column;
+    }
+
+    .btn-view-order {
+      display: block;
+      width: 100%;
+      background: #2B8A3E;
+      color: #FFFFFF !important;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.90rem;
+      padding: 11px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(43, 138, 62, 0.25);
+      transition: all 0.2s ease;
+      font-family: inherit;
+      text-align: center;
+      word-break: keep-all;
+    }
+
+    .btn-view-order:hover {
+      background: #237032;
+      transform: translateY(-1px);
+    }
+
+    .btn-return-shop-primary {
+      display: block;
+      width: 100%;
+      background: #A66F55;
+      color: #FFFFFF !important;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.95rem;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(166, 111, 85, 0.3);
+      transition: all 0.2s ease;
+      font-family: inherit;
+      text-align: center;
+      word-break: keep-all;
+    }
+
+    .btn-return-shop-primary:hover {
+      background: #8F5B43;
+      transform: translateY(-1px);
+    }
+
+    .btn-view-order-sub {
+      display: block;
+      width: 100%;
+      background: #FAF5EE;
+      color: #604638 !important;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.86rem;
+      padding: 9px;
+      border-radius: 8px;
+      border: 1px solid #D8C5A5;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      text-align: center;
+      word-break: keep-all;
+    }
+
+    .btn-view-order-sub:hover {
+      background: #EFE8DF;
+    }
+
+    .btn-return-shop-reward {
+      display: block;
+      width: 100%;
+      background: #FAF5EE;
+      color: #604638 !important;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.86rem;
+      padding: 9px;
+      border-radius: 8px;
+      border: 1px solid #D8C5A5;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      text-align: center;
+    }
+
+    .btn-return-shop-reward:hover {
+      background: #EFE8DF;
+    }
+
+    .btn-fun-play-toggle {
+      background: none;
+      border: none;
+      color: #8C7B72;
+      font-size: 0.78rem;
+      text-decoration: underline;
+      cursor: pointer;
+      padding: 4px 8px;
+      font-family: inherit;
+      transition: color 0.15s ease;
+    }
+
+    .btn-fun-play-toggle:hover {
+      color: #4A3528;
+    }
+
+    /* Start screen campaign notices */
+    .start-screen-campaign-notice {
+      background: #FFF9F5;
+      border: 1.5px solid #E8DDD0;
+      border-radius: 12px;
+      padding: 10px 14px;
+      margin-bottom: 14px;
+      font-size: 0.84rem;
+      line-height: 1.5;
+      text-align: center;
+      font-family: 'Plus Jakarta Sans', 'Noto Sans JP', sans-serif;
+      word-break: keep-all;
+    }
+
+    .start-screen-campaign-notice.active {
+      background: #FFF4ED;
+      border-color: #F7C5B0;
+      color: #8C3E26;
+    }
+
+    .start-screen-campaign-notice.exhausted {
+      background: #F8F5F2;
+      border-color: #E2D7CF;
+      color: #6C5950;
+    }
+
+    .start-screen-campaign-notice.claimed {
+      background: #EBF7E7;
+      border-color: #B8E4AE;
+      color: #265B1D;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes popScale {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
     }
   </style>
 </head>
 <body>
-  <a href="../index.php" class="back-to-shop-floating" title="Sweet Choice ショップに戻る">
-    ← ショップに戻る (Back to Shop)
-  </a>
+
+  <!-- Unified Top Bar: Back Button + Campaign Status & Attempts -->
+  <div class="game-top-bar">
+    <!-- Back to Shop Button -->
+    <a href="../index.php" class="back-to-shop-btn" title="Sweet Choice ショップに戻る">
+      <span>🏪</span>
+      <span>ショップへ戻る</span>
+    </a>
+
+    <!-- Campaign Status & Attempts Pill Button -->
+    <button type="button" id="campaign-pill-btn" class="campaign-pill-btn" title="キャンペーン詳細・認証">
+      <span>🎂</span>
+      <span id="pill-label-long" class="campaign-pill-text-long">¥3,000以上でミニケーキ特典</span>
+      <span id="pill-label-short" class="campaign-pill-text-short">ミニケーキ特典</span>
+      <span id="pill-status-badge" class="campaign-pill-badge">詳細</span>
+      <span id="pill-attempts-badge" class="attempts-badge" style="display:none;">残り 3/3回</span>
+    </button>
+  </div>
+
+  <!-- In-Game 2,000 Point Milestone Alert Banner -->
+  <div id="milestone-banner" class="milestone-banner">
+    <span>🎉</span>
+    <span>2,000点突破！ミニケーキ特典獲得！</span>
+    <span>🎂</span>
+  </div>
+
+  <!-- Campaign Details & Verification Modal -->
+  <div id="campaign-modal" class="campaign-modal-overlay">
+    <div class="campaign-modal-card">
+      <button type="button" class="modal-close-btn" id="modal-close-btn">&times;</button>
+      
+      <div class="campaign-modal-title">
+        <span>🎂</span>
+        <span>ミニケーキプレゼントキャンペーン</span>
+      </div>
+      <div class="campaign-modal-subtitle">
+        Sweet Choice でお買い物いただいたお客様へ贈るスペシャルチャレンジ！
+      </div>
+
+      <div class="campaign-rule-box">
+        <strong>【キャンペーンルール＆挑戦条件】</strong>
+        <ul>
+          <li><strong>お買い物条件</strong>：Sweet Choice で<strong>合計¥3,000以上</strong>ご購入されたお客様が対象です。</li>
+          <li><strong>挑戦は最大3回まで</strong>：特典チャレンジは1つのご注文につき<strong>最大3回まで</strong>挑戦できます（ページを更新しても挑戦回数は保持されます）。</li>
+          <li><strong>目標スコア 2,000点</strong>：3回以内にスコア2,000点以上を達成すると、該当のご注文に<strong>「パティシエ特製ミニケーキ（無料 ¥0）」を自動追加</strong>いたします！</li>
+          <li><strong>チャレンジ終了後</strong>：3回の挑戦が終了（残り 0/3回）すると特典挑戦は終了し、通常モードへ移行します。</li>
+        </ul>
+      </div>
+
+      <div class="status-check-box">
+        <div class="status-badge-row">
+          <strong>お客様の対象状況:</strong>
+          <span id="modal-eligibility-status" style="font-weight:700; color:#81736A;">確認中...</span>
+        </div>
+        <div id="modal-status-detail" style="font-size:0.84rem; color:#81736A; line-height:1.5;"></div>
+        
+        <!-- Verification Input for Order Number (Always Accessible for new orders) -->
+        <div id="verify-form-area" style="margin-top:14px; padding-top:12px; border-top:1px dashed #E8DDD0;">
+          <label style="font-size:0.82rem; font-weight:700; display:block; margin-bottom:6px; color:#4A3528;">
+            🎫 ご注文番号の入力・切り替え (Verify / Switch Order):
+          </label>
+          <div class="verify-input-group">
+            <input type="text" id="order-number-input" class="verify-input" placeholder="例: SWC-20261124-XXXXX" />
+            <button type="button" id="btn-verify-order" class="verify-btn">認証する</button>
+          </div>
+          <div style="font-size:0.75rem; color:#81736A; margin-top:5px;">
+            ※ 新しいご注文の特典に挑戦する場合は、こちらに新しい注文番号を入力して「認証する」を押してください。
+          </div>
+          <div id="verify-msg" style="font-size:0.80rem; margin-top:6px; font-weight:700;"></div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:10px; justify-content:flex-end;">
+        <button type="button" class="verify-btn" style="background:#FAF5EE; color:#604638; border:1px solid #D8C5A5;" onclick="closeCampaignModal()">
+          閉じる
+        </button>
+        <a href="../category.php" class="verify-btn" style="text-decoration:none; display:inline-flex; align-items:center; gap:4px;">
+          🍰 ショップでお買い物（¥3,000〜）
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3D Game Canvas & React Root -->
   <div id="root"></div>
+
+  <!-- Client Script: Campaign Tracking & Automatic Order Reward Handler -->
+  <script>
+    let campaignState = {
+      isLoggedIn: false,
+      isEligible: false,
+      orderId: null,
+      orderNumber: null,
+      grandTotal: 0,
+      customerName: null,
+      targetScore: 2000,
+      maxAttempts: 3,
+      attemptsUsed: 0,
+      remainingAttempts: 0,
+      rewardClaimed: false,
+      claimedAt: null,
+      milestoneTriggered: false,
+      attemptConsumedForThisRound: false,
+      freePlayAllowedAfterExhaustion: false
+    };
+
+    // 1. Fetch Campaign & User Eligibility on Load (Supports ?order=SWC-XXXXX)
+    async function loadCampaignStatus() {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderFromUrl = urlParams.get('order');
+        const endpoint = orderFromUrl 
+          ? `../api/game-reward.php?action=check_status&order=${encodeURIComponent(orderFromUrl)}`
+          : '../api/game-reward.php?action=check_status';
+
+        const res = await fetch(endpoint);
+        const data = await res.json();
+        if (data.success) {
+          campaignState.isLoggedIn = data.is_logged_in;
+          campaignState.isEligible = data.is_eligible;
+          campaignState.orderId = data.order_id;
+          campaignState.orderNumber = data.order_number;
+          campaignState.grandTotal = data.grand_total;
+          campaignState.customerName = data.customer_name;
+          campaignState.attemptsUsed = data.attempts_used || 0;
+          campaignState.remainingAttempts = data.remaining_attempts !== undefined ? data.remaining_attempts : 0;
+          campaignState.rewardClaimed = !!data.reward_claimed;
+          campaignState.claimedAt = data.claimed_at;
+          updateTopBarUI();
+          updateStartScreenBanner();
+
+          // If on GameOver screen and remainingAttempts > 0, ensure restartBtn is restored
+          const restartBtn = document.getElementById('restart-btn');
+          if (restartBtn && campaignState.remainingAttempts > 0 && !campaignState.rewardClaimed) {
+            restartBtn.style.display = 'block';
+          }
+        }
+      } catch (e) {
+        console.warn('Could not fetch campaign status:', e);
+      }
+    }
+
+    function updateTopBarUI() {
+      const pillLabelLong = document.getElementById('pill-label-long');
+      const pillLabelShort = document.getElementById('pill-label-short');
+      const pillBadge = document.getElementById('pill-status-badge');
+      const attemptsBadge = document.getElementById('pill-attempts-badge');
+      const modalStatus = document.getElementById('modal-eligibility-status');
+      const modalDetail = document.getElementById('modal-status-detail');
+      const verifyForm = document.getElementById('verify-form-area');
+
+      // Form is always kept visible so users can switch orders
+      if (verifyForm) verifyForm.style.display = 'block';
+
+      if (campaignState.isEligible) {
+        if (campaignState.rewardClaimed) {
+          pillLabelLong.textContent = '🎉 特製ミニケーキ獲得済み！';
+          pillLabelShort.textContent = '特典獲得済';
+          pillBadge.textContent = '獲得済';
+          pillBadge.className = 'campaign-pill-badge qualified';
+          attemptsBadge.style.display = 'inline-block';
+          attemptsBadge.className = 'attempts-badge claimed';
+          attemptsBadge.textContent = '受取完了';
+
+          modalStatus.textContent = '✅ 特製ミニケーキ獲得済み（¥0）';
+          modalStatus.style.color = '#2B8A3E';
+          modalDetail.innerHTML = `ご注文（注文番号: <strong>#${campaignState.orderNumber}</strong>）に<strong>「パティシエ特製ミニケーキ（無料 ¥0）」</strong>を自動追加いたしました！`;
+        } else if (campaignState.remainingAttempts > 0) {
+          pillLabelLong.textContent = '🌟 特典対象：スコア2,000点でミニケーキ獲得！';
+          pillLabelShort.textContent = '特典対象';
+          pillBadge.textContent = '対象者';
+          pillBadge.className = 'campaign-pill-badge qualified';
+          attemptsBadge.style.display = 'inline-block';
+          attemptsBadge.className = 'attempts-badge';
+          attemptsBadge.textContent = `残り ${campaignState.remainingAttempts}/3回`;
+
+          modalStatus.textContent = `✅ チャレンジ対象（残り: ${campaignState.remainingAttempts}/3回）`;
+          modalStatus.style.color = '#2B8A3E';
+          modalDetail.innerHTML = `¥3,000以上のご注文（注文番号: <strong>#${campaignState.orderNumber}</strong>、合計: ¥${campaignState.grandTotal.toLocaleString()}）を確認済みです！<br>残り <strong>${campaignState.remainingAttempts}回</strong> の挑戦中にスコア2,000点達成で、ご注文に「特製ミニケーキ（無料 ¥0）」が自動追加されます。`;
+        } else {
+          // 3 attempts exhausted
+          pillLabelLong.textContent = '🚫 チャレンジ終了（残り 0/3回）';
+          pillLabelShort.textContent = '挑戦終了';
+          pillBadge.textContent = '終了';
+          pillBadge.className = 'campaign-pill-badge';
+          attemptsBadge.style.display = 'inline-block';
+          attemptsBadge.className = 'attempts-badge exhausted';
+          attemptsBadge.textContent = '0/3回';
+
+          modalStatus.textContent = '全3回のチャレンジ終了（特典期間終了）';
+          modalStatus.style.color = '#868E96';
+          modalDetail.innerHTML = `ご注文（注文番号: <strong>#${campaignState.orderNumber}</strong>）の特典チャレンジ回数（3回）をすべて使用されました。新しいご注文の特典に挑戦する場合は、下のフォームから新しい注文番号を入力してください。`;
+        }
+      } else if (campaignState.isLoggedIn) {
+        pillLabelLong.textContent = '🎂 ¥3,000以上でミニケーキ特典';
+        pillLabelShort.textContent = '特典詳細';
+        pillBadge.textContent = '詳細';
+        pillBadge.className = 'campaign-pill-badge';
+        attemptsBadge.style.display = 'none';
+
+        modalStatus.textContent = '未達成（¥3,000以上のお買い物が必要です）';
+        modalStatus.style.color = '#D9480F';
+        modalDetail.innerHTML = `現在ログイン中ですが、¥3,000以上のご注文履歴がありません。ショップで¥3,000以上ご注文いただくと特典チャレンジ（3回）がアンロックされます！`;
+      } else {
+        pillLabelLong.textContent = '🎂 ¥3,000以上でミニケーキ特典';
+        pillLabelShort.textContent = '特典詳細';
+        pillBadge.textContent = '詳細・認証';
+        pillBadge.className = 'campaign-pill-badge';
+        attemptsBadge.style.display = 'none';
+
+        modalStatus.textContent = 'ゲストプレイ中（どなたでも遊べます！）';
+        modalStatus.style.color = '#604638';
+        modalDetail.innerHTML = `ゲームはどなたでも自由にお楽しみいただけます。Sweet Choice で¥3,000以上ご注文済みの方は、以下のフォームから注文番号を入力して特典チャレンジ（3回）を認証できます。`;
+      }
+    }
+
+    // Update Banner on Start Screen
+    function updateStartScreenBanner() {
+      const startCard = document.querySelector('#start-screen .card');
+      const startBtn = document.getElementById('start-btn');
+      if (!startCard) return;
+
+      let banner = document.getElementById('start-campaign-banner');
+      if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'start-campaign-banner';
+        banner.className = 'start-screen-campaign-notice';
+        if (startBtn) {
+          startCard.insertBefore(banner, startBtn);
+        } else {
+          startCard.appendChild(banner);
+        }
+      }
+
+      if (campaignState.isEligible) {
+        if (campaignState.rewardClaimed) {
+          banner.className = 'start-screen-campaign-notice claimed';
+          banner.innerHTML = `
+            🎉 ご注文（#<strong>${campaignState.orderNumber}</strong>）に「特製ミニケーキ（無料 ¥0）」を追加済みです！<br>
+            <div style="margin-top:6px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+              <a href="../order-confirmation.php?order=${encodeURIComponent(campaignState.orderNumber)}" style="color:#2B8A3E; font-weight:700; text-decoration:underline;">📄 注文内容を確認する</a>
+              <button type="button" class="verify-btn" style="padding:4px 10px; font-size:0.75rem;" onclick="openCampaignModal()">🎫 別の注文番号を認証</button>
+            </div>
+          `;
+          if (startBtn) startBtn.textContent = 'フリープレイ（特典なし） 🚀';
+        } else if (campaignState.remainingAttempts > 0) {
+          banner.className = 'start-screen-campaign-notice active';
+          banner.innerHTML = `
+            🎂 ご注文（#<strong>${campaignState.orderNumber}</strong>）特典チャレンジ対象！<br>
+            2,000点達成でミニケーキ（無料 ¥0）プレゼント！ <strong>残り: ${campaignState.remainingAttempts}/3回</strong>
+          `;
+          if (startBtn) startBtn.textContent = `チャレンジスタート 🚀（残り ${campaignState.remainingAttempts}/3回）`;
+        } else {
+          banner.className = 'start-screen-campaign-notice exhausted';
+          banner.innerHTML = `
+            🚫 ご注文（#<strong>${campaignState.orderNumber}</strong>）の特典チャレンジ（全3回）は終了しました。<br>
+            <div style="margin-top:8px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+              <button type="button" class="verify-btn" style="padding:6px 14px; font-size:0.80rem;" onclick="openCampaignModal()">
+                🎫 新しい注文番号で挑戦する
+              </button>
+              <a href="../index.php" class="verify-btn" style="background:#FAF5EE; color:#604638; border:1px solid #D8C5A5; text-decoration:none; padding:6px 14px; font-size:0.80rem;">
+                🏪 ショップへ戻る
+              </a>
+            </div>
+          `;
+          if (startBtn) startBtn.textContent = 'フリープレイ（特典なし） 🚀';
+        }
+      } else {
+        banner.style.display = 'none';
+      }
+    }
+
+    // 2. Consume Attempt when starting a game
+    async function notifyAttemptStart() {
+      if (!campaignState.isEligible || campaignState.rewardClaimed || campaignState.remainingAttempts <= 0) {
+        return;
+      }
+      if (campaignState.attemptConsumedForThisRound) {
+        return;
+      }
+
+      try {
+        const formData = new FormData();
+        formData.append('action', 'start_attempt');
+        const res = await fetch('../api/game-reward.php', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.success && data.mode === 'challenge_attempt') {
+          campaignState.attemptConsumedForThisRound = true;
+          campaignState.attemptsUsed = data.attempts_used;
+          campaignState.remainingAttempts = data.remaining_attempts;
+          updateTopBarUI();
+          updateStartScreenBanner();
+        }
+      } catch (e) {
+        console.warn('Could not record attempt start:', e);
+      }
+    }
+
+    // Listen to Start & Restart button clicks to consume attempt
+    document.addEventListener('click', (e) => {
+      const target = e.target;
+      if (target && (target.id === 'start-btn' || target.id === 'restart-btn' || target.id === 'pause-restart-btn')) {
+        campaignState.attemptConsumedForThisRound = false;
+        campaignState.milestoneTriggered = false;
+        rewardInjected = false;
+        const oldBanner = document.getElementById('dynamic-gameover-reward');
+        if (oldBanner) oldBanner.remove();
+
+        notifyAttemptStart();
+      }
+    });
+
+    // Space/Enter keys on Start or Game Over screens
+    window.addEventListener('keydown', (e) => {
+      if (e.key === ' ' || e.key === 'Enter') {
+        const startScreen = document.getElementById('start-screen');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const isStart = startScreen && !startScreen.classList.contains('hidden');
+        const isGameOver = gameOverScreen && !gameOverScreen.classList.contains('hidden');
+        const restartBtn = document.getElementById('restart-btn');
+
+        if (isGameOver) {
+          // If restart button is hidden (won or exhausted without choosing fun play), prevent restarting!
+          if (restartBtn && restartBtn.style.display === 'none') {
+            e.stopPropagation();
+            return;
+          }
+        }
+
+        if (isStart || isGameOver) {
+          campaignState.attemptConsumedForThisRound = false;
+          campaignState.milestoneTriggered = false;
+          rewardInjected = false;
+          const oldBanner = document.getElementById('dynamic-gameover-reward');
+          if (oldBanner) oldBanner.remove();
+
+          notifyAttemptStart();
+        }
+      }
+    });
+
+    // 3. Milestone Checker during running game (Target: 2,000 points)
+    function checkLiveScore() {
+      const scoreEl = document.getElementById('score-val');
+      if (scoreEl) {
+        const currentScore = parseInt(scoreEl.textContent, 10) || 0;
+        if (currentScore >= 2000 && !campaignState.milestoneTriggered) {
+          campaignState.milestoneTriggered = true;
+          triggerMilestoneCelebration();
+        }
+      }
+
+      // Check if Game Over screen is showing
+      const gameOverScreen = document.getElementById('game-over-screen');
+      if (gameOverScreen && !gameOverScreen.classList.contains('hidden')) {
+        injectGameOverRewardCard();
+      } else {
+        // Start screen observer
+        const startScreen = document.getElementById('start-screen');
+        if (startScreen && !startScreen.classList.contains('hidden')) {
+          updateStartScreenBanner();
+        }
+      }
+    }
+
+    function triggerMilestoneCelebration() {
+      const banner = document.getElementById('milestone-banner');
+      if (banner) {
+        banner.classList.add('active');
+        setTimeout(() => {
+          banner.classList.remove('active');
+        }, 3800);
+      }
+    }
+
+    // 4. Inject Reward Card into Game Over Screen
+    let rewardInjected = false;
+    async function injectGameOverRewardCard() {
+      if (rewardInjected) return;
+      const card = document.querySelector('#game-over-screen .card');
+      const finalScoreEl = document.getElementById('final-score-val');
+      const restartBtn = document.getElementById('restart-btn');
+      if (!card || !finalScoreEl) return;
+
+      const finalScore = parseInt(finalScoreEl.textContent, 10) || 0;
+      rewardInjected = true;
+
+      const rewardContainer = document.createElement('div');
+      rewardContainer.id = 'dynamic-gameover-reward';
+      rewardContainer.className = 'gameover-reward-banner';
+
+      if (finalScore >= 2000 && campaignState.isEligible && !campaignState.rewardClaimed) {
+        // =================================================================
+        // WIN SCENARIO: SCORE >= 2000 WITHIN 3 ATTEMPTS -> ADD FOR ¥0!
+        // =================================================================
+        rewardContainer.className = 'gameover-reward-banner won-banner';
+        rewardContainer.innerHTML = `
+          <span class="reward-banner-crown">🎁 👑</span>
+          <div class="reward-banner-title" style="word-break: keep-all;">2,000点達成！ミニケーキプレゼント獲得！</div>
+          <div class="reward-banner-desc" style="word-break: keep-all;">
+            ご注文にミニケーキ（¥0）を追加処理中...
+          </div>
+        `;
+
+        // Hide restart button because reward is won!
+        if (restartBtn) {
+          restartBtn.style.display = 'none';
+          card.insertBefore(rewardContainer, restartBtn);
+        } else {
+          card.appendChild(rewardContainer);
+        }
+
+        // Call claim_reward API
+        try {
+          const formData = new FormData();
+          formData.append('action', 'claim_reward');
+          formData.append('score', finalScore);
+
+          const res = await fetch('../api/game-reward.php', { method: 'POST', body: formData });
+          const data = await res.json();
+
+          if (data.success || data.already_claimed) {
+            campaignState.rewardClaimed = true;
+            updateTopBarUI();
+
+            rewardContainer.innerHTML = `
+              <span class="reward-banner-crown">🎁 👑</span>
+              <div class="reward-banner-title" style="word-break: keep-all;">2,000点達成！ミニケーキプレゼント獲得！</div>
+              <div class="reward-confirmed-badge">
+                ✓ ご注文に「パティシエ特製ミニケーキ（無料 ¥0）」を自動追加しました！
+              </div>
+              <div class="reward-banner-desc" style="word-break: keep-all;">
+                おめでとうございます！2,000点クリア！<br>
+                ご注文（注文番号: <strong>#${data.order_number}</strong>）に<strong>「パティシエ特製ミニケーキ（無料 ¥0）」</strong>を自動追加いたしました！
+              </div>
+              <div class="reward-modal-actions">
+                <a href="${data.order_url}" class="btn-view-order">
+                  📄 注文内容を確認する (View Order)
+                </a>
+                <a href="../index.php" class="btn-return-shop-reward">
+                  🏪 ショップへ戻る (Back to Shop)
+                </a>
+              </div>
+            `;
+          } else {
+            rewardContainer.innerHTML = `
+              <div style="font-size:0.86rem; color:#D9480F; word-break: keep-all;">
+                ${data.message || '特典の処理中にエラーが発生しました。'}
+              </div>
+            `;
+          }
+        } catch (err) {
+          rewardContainer.innerHTML = `
+            <div style="font-size:0.86rem; color:#D9480F;">通信エラーが発生しました。</div>
+          `;
+        }
+
+      } else if (campaignState.rewardClaimed) {
+        // =================================================================
+        // ALREADY CLAIMED
+        // =================================================================
+        rewardContainer.className = 'gameover-reward-banner won-banner';
+        rewardContainer.innerHTML = `
+          <span class="reward-banner-crown">🍰 👑</span>
+          <div class="reward-banner-title" style="word-break: keep-all;">特製ミニケーキ獲得済み（¥0）</div>
+          <div class="reward-banner-desc" style="word-break: keep-all;">
+            ご注文（注文番号: <strong>#${campaignState.orderNumber}</strong>）にパティシエ特製ミニケーキがすでに追加されています。
+          </div>
+          <div class="reward-modal-actions">
+            <a href="../order-confirmation.php?order=${encodeURIComponent(campaignState.orderNumber)}" class="btn-view-order">
+              📄 注文内容を確認する
+            </a>
+            <a href="../index.php" class="btn-return-shop-reward">
+              🏪 ショップへ戻る
+            </a>
+          </div>
+        `;
+
+        if (restartBtn) {
+          restartBtn.style.display = 'none';
+          card.insertBefore(rewardContainer, restartBtn);
+        } else {
+          card.appendChild(rewardContainer);
+        }
+
+      } else if (campaignState.isEligible && campaignState.remainingAttempts <= 0) {
+        // =================================================================
+        // CHANCE 0/3: EXHAUSTED ALL 3 TRIES -> STOP MINI CAKE GAME!
+        // =================================================================
+        rewardContainer.className = 'gameover-reward-banner exhausted-banner';
+        rewardContainer.innerHTML = `
+          <span class="reward-banner-crown">🚫 🍰</span>
+          <div class="reward-banner-title" style="word-break: keep-all; color:#84382B;">
+            ミニケーキ特典チャレンジ終了（0/3回）
+          </div>
+          <div class="reward-exhausted-badge">
+            全3回の特典チャレンジが終了しました
+          </div>
+          <div class="reward-banner-desc" style="word-break: keep-all;">
+            全3回のチャレンジが終了いたしました。<br>
+            ご注文（注文番号: <strong>#${campaignState.orderNumber}</strong>）でのミニケーキ特典獲得は終了となります。<br>
+            新しいご注文の特典に挑戦する場合は下のボタンから注文番号を入力してください。
+          </div>
+          <div class="reward-modal-actions">
+            <button type="button" class="btn-return-shop-primary" onclick="openCampaignModal()">
+              🎫 新しい注文番号で挑戦する (Try New Order)
+            </button>
+            <a href="../index.php" class="btn-view-order-sub">
+              🏪 ショップへ戻る (Back to Shop)
+            </a>
+            <a href="../order-confirmation.php?order=${encodeURIComponent(campaignState.orderNumber)}" class="btn-view-order-sub">
+              📄 注文内容を確認する (View Order)
+            </a>
+          </div>
+          <div style="margin-top:12px;">
+            <button type="button" id="btn-allow-fun-play" class="btn-fun-play-toggle">
+              🎮 特典なしの通常プレイで遊ぶ (Play for fun only)
+            </button>
+          </div>
+        `;
+
+        // Hide restart button so game for mini cake is stopped
+        if (restartBtn) {
+          restartBtn.style.display = 'none';
+          card.insertBefore(rewardContainer, restartBtn);
+        } else {
+          card.appendChild(rewardContainer);
+        }
+
+        // Discrete option to play for fun only
+        const funBtn = document.getElementById('btn-allow-fun-play');
+        if (funBtn) {
+          funBtn.addEventListener('click', () => {
+            if (restartBtn) {
+              restartBtn.style.display = 'block';
+              restartBtn.textContent = '通常スコアアタックで遊ぶ 🚀';
+            }
+            funBtn.style.display = 'none';
+          });
+        }
+
+        // Inform backend attempt is finished
+        try {
+          const formData = new FormData();
+          formData.append('action', 'record_attempt_finish');
+          formData.append('score', finalScore);
+          fetch('../api/game-reward.php', { method: 'POST', body: formData });
+        } catch (e) {}
+
+      } else if (campaignState.isEligible && campaignState.remainingAttempts > 0) {
+        // =================================================================
+        // ACTIVE CHALLENGE: SCORE < 2000, STILL HAS REMAINING ATTEMPTS (1/3 or 2/3)
+        // =================================================================
+        const needed = 2000 - finalScore;
+        rewardContainer.innerHTML = `
+          <div style="font-size:0.88rem; color:#8A5442; word-break: keep-all; line-height: 1.55;">
+            🎯 あと <strong>${needed.toLocaleString()} 点</strong> で「ミニケーキプレゼント」獲得条件（2,000点）クリア！<br>
+            残りチャレンジ: <strong>${campaignState.remainingAttempts}/3回</strong>（あと ${campaignState.remainingAttempts}回 挑戦できます）<br>
+            もう一度挑戦しよう！
+          </div>
+        `;
+
+        if (restartBtn) {
+          restartBtn.style.display = 'block';
+          restartBtn.textContent = `Play Again 🔄（残り ${campaignState.remainingAttempts}/3回）`;
+          card.insertBefore(rewardContainer, restartBtn);
+        } else {
+          card.appendChild(rewardContainer);
+        }
+
+        // Inform backend attempt is finished
+        try {
+          const formData = new FormData();
+          formData.append('action', 'record_attempt_finish');
+          formData.append('score', finalScore);
+          fetch('../api/game-reward.php', { method: 'POST', body: formData });
+        } catch (e) {}
+
+      } else if (finalScore >= 2000) {
+        // SCORE >= 2000 BUT GUEST / UNVERIFIED ORDER
+        rewardContainer.innerHTML = `
+          <span class="reward-banner-crown">⭐ 🍰</span>
+          <div class="reward-banner-title" style="word-break: keep-all;">2,000点クリア達成！</div>
+          <div class="reward-banner-desc" style="word-break: keep-all;">
+            素晴らしい走りでした！Sweet Choice で¥3,000以上お買い物をしてご注文番号を認証すると、この「特製ミニケーキプレゼント」をご注文に追加できます！
+          </div>
+          <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+            <button type="button" class="verify-btn" onclick="openCampaignModal()">注文番号を認証する</button>
+            <a href="../category.php" class="verify-btn" style="text-decoration:none;">ショップでお買い物（¥3,000〜）</a>
+          </div>
+        `;
+        if (restartBtn) {
+          restartBtn.style.display = 'block';
+          card.insertBefore(rewardContainer, restartBtn);
+        } else {
+          card.appendChild(rewardContainer);
+        }
+
+      } else {
+        // GUEST / UNVERIFIED SCORE < 2000
+        rewardContainer.innerHTML = `
+          <div style="font-size:0.86rem; color:#8A5442; word-break: keep-all; line-height: 1.5;">
+            Sweet Choice で¥3,000以上ご注文いただくと、2,000点クリアで特製ミニケーキプレゼント（無料）のチャレンジに挑戦できます！
+          </div>
+        `;
+        if (restartBtn) {
+          restartBtn.style.display = 'block';
+          card.insertBefore(rewardContainer, restartBtn);
+        } else {
+          card.appendChild(rewardContainer);
+        }
+      }
+    }
+
+    // 5. Modal Handlers
+    function openCampaignModal() {
+      document.getElementById('campaign-modal').classList.add('open');
+      const input = document.getElementById('order-number-input');
+      if (input) setTimeout(() => input.focus(), 150);
+    }
+    function closeCampaignModal() {
+      document.getElementById('campaign-modal').classList.remove('open');
+    }
+
+    document.getElementById('campaign-pill-btn').addEventListener('click', openCampaignModal);
+    document.getElementById('modal-close-btn').addEventListener('click', closeCampaignModal);
+    document.getElementById('campaign-modal').addEventListener('click', (e) => {
+      if (e.target.id === 'campaign-modal') closeCampaignModal();
+    });
+
+    // 6. Verify / Switch Order Number
+    document.getElementById('btn-verify-order').addEventListener('click', async () => {
+      const orderInput = document.getElementById('order-number-input').value.trim();
+      const msgEl = document.getElementById('verify-msg');
+      if (!orderInput) {
+        msgEl.textContent = '注文番号を入力してください。';
+        msgEl.style.color = '#D9480F';
+        return;
+      }
+
+      msgEl.textContent = '認証中...';
+      msgEl.style.color = '#81736A';
+
+      try {
+        const formData = new FormData();
+        formData.append('action', 'verify_order');
+        formData.append('order_number', orderInput);
+
+        const res = await fetch('../api/game-reward.php', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          const s = data.status;
+          campaignState.isEligible = s.is_eligible;
+          campaignState.orderId = s.order_id;
+          campaignState.orderNumber = s.order_number;
+          campaignState.grandTotal = s.grand_total;
+          campaignState.customerName = s.customer_name;
+          campaignState.attemptsUsed = s.attempts_used;
+          campaignState.remainingAttempts = s.remaining_attempts;
+          campaignState.rewardClaimed = s.reward_claimed;
+          campaignState.claimedAt = s.claimed_at;
+          campaignState.attemptConsumedForThisRound = false;
+          campaignState.milestoneTriggered = false;
+          rewardInjected = false;
+
+          // Remove old gameover banner if switching from gameover
+          const oldBanner = document.getElementById('dynamic-gameover-reward');
+          if (oldBanner) oldBanner.remove();
+
+          // Restore restart button if on gameover screen
+          const restartBtn = document.getElementById('restart-btn');
+          if (restartBtn && campaignState.remainingAttempts > 0) {
+            restartBtn.style.display = 'block';
+            restartBtn.textContent = `Play Again 🔄（残り ${campaignState.remainingAttempts}/3回）`;
+          }
+
+          updateTopBarUI();
+          updateStartScreenBanner();
+          msgEl.textContent = data.message;
+          msgEl.style.color = '#2B8A3E';
+
+          // Close modal after brief success feedback
+          setTimeout(() => {
+            closeCampaignModal();
+          }, 1200);
+        } else {
+          msgEl.textContent = data.message;
+          msgEl.style.color = '#D9480F';
+        }
+      } catch (e) {
+        msgEl.textContent = '通信エラーが発生しました。';
+        msgEl.style.color = '#D9480F';
+      }
+    });
+
+    // Start observers
+    window.addEventListener('DOMContentLoaded', () => {
+      loadCampaignStatus();
+      setInterval(checkLiveScore, 300);
+    });
+  </script>
+
 </body>
 </html>
