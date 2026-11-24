@@ -84,6 +84,94 @@ $seasonStmt = $pdo->query("
     LIMIT 3
 ");
 $seasonalProducts = $seasonStmt->fetchAll(PDO::FETCH_ASSOC);
+
+// 6. Hybrid Popular Products Selection Logic (Target: 8 items to match grid row layout, zero duplicates)
+$targetPopularCount = 8;
+$popularProducts = [];
+$selectedPopularIds = [];
+
+// Priority 1 (Manually Featured): Feature in Popular Items Section flag is enabled (true / 1), Available, Stock > 0
+$p1Stmt = $pdo->prepare("
+    SELECT p.*, c.name_en AS category_name_en, c.name_ja AS category_name_ja, c.slug AS category_slug
+    FROM products p
+    JOIN categories c ON p.category_id = c.id
+    WHERE p.is_popular = 1 
+      AND p.availability = 'available' 
+      AND p.stock > 0
+    ORDER BY p.id ASC
+    LIMIT ?
+");
+$p1Stmt->bindValue(1, $targetPopularCount, PDO::PARAM_INT);
+$p1Stmt->execute();
+$p1Items = $p1Stmt->fetchAll(PDO::FETCH_ASSOC);
+
+foreach ($p1Items as $item) {
+    $popularProducts[] = $item;
+    $selectedPopularIds[] = (int)$item['id'];
+}
+
+// Priority 2 (Top-Selling Fallback): If fewer items than target count are featured, fill using top-selling desserts from completed orders
+$remainingSlots = $targetPopularCount - count($popularProducts);
+if ($remainingSlots > 0) {
+    $placeholders = !empty($selectedPopularIds) ? implode(',', array_fill(0, count($selectedPopularIds), '?')) : '0';
+    $p2Sql = "
+        SELECT p.*, c.name_en AS category_name_en, c.name_ja AS category_name_ja, c.slug AS category_slug,
+               COALESCE(SUM(oi.quantity), 0) AS total_sold
+        FROM products p
+        JOIN categories c ON p.category_id = c.id
+        JOIN order_items oi ON oi.product_id = p.id
+        JOIN orders o ON oi.order_id = o.id
+        WHERE o.status IN ('Completed', 'Delivered')
+          AND p.availability = 'available'
+          AND p.stock > 0
+          AND p.id NOT IN ($placeholders)
+        GROUP BY p.id
+        ORDER BY total_sold DESC, p.id ASC
+        LIMIT ?
+    ";
+    $p2Stmt = $pdo->prepare($p2Sql);
+    $paramIdx = 1;
+    foreach ($selectedPopularIds as $id) {
+        $p2Stmt->bindValue($paramIdx++, $id, PDO::PARAM_INT);
+    }
+    $p2Stmt->bindValue($paramIdx, $remainingSlots, PDO::PARAM_INT);
+    $p2Stmt->execute();
+    $p2Items = $p2Stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($p2Items as $item) {
+        $popularProducts[] = $item;
+        $selectedPopularIds[] = (int)$item['id'];
+    }
+}
+
+// Priority 3 (Fallback if no orders exist yet): Fill remaining slots with newest available desserts in stock
+$remainingSlots = $targetPopularCount - count($popularProducts);
+if ($remainingSlots > 0) {
+    $placeholders = !empty($selectedPopularIds) ? implode(',', array_fill(0, count($selectedPopularIds), '?')) : '0';
+    $p3Sql = "
+        SELECT p.*, c.name_en AS category_name_en, c.name_ja AS category_name_ja, c.slug AS category_slug
+        FROM products p
+        JOIN categories c ON p.category_id = c.id
+        WHERE p.availability = 'available'
+          AND p.stock > 0
+          AND p.id NOT IN ($placeholders)
+        ORDER BY p.id DESC
+        LIMIT ?
+    ";
+    $p3Stmt = $pdo->prepare($p3Sql);
+    $paramIdx = 1;
+    foreach ($selectedPopularIds as $id) {
+        $p3Stmt->bindValue($paramIdx++, $id, PDO::PARAM_INT);
+    }
+    $p3Stmt->bindValue($paramIdx, $remainingSlots, PDO::PARAM_INT);
+    $p3Stmt->execute();
+    $p3Items = $p3Stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($p3Items as $item) {
+        $popularProducts[] = $item;
+        $selectedPopularIds[] = (int)$item['id'];
+    }
+}
 ?>
 
 <!-- 1. Hero Section -->
@@ -121,6 +209,72 @@ $seasonalProducts = $seasonStmt->fetchAll(PDO::FETCH_ASSOC);
         <?php endif; ?>
     </div>
 </section>
+
+<!-- 2. Hybrid Popular Products Section (Directly Under Banners) -->
+<?php if (!empty($popularProducts)): ?>
+<section class="popular-products-section">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag section-tag-natural"><?= e(__('popular_tag', isJapanese() ? '厳選人気商品' : 'Boutique Favorites')); ?></span>
+            <h2 class="section-title"><?= e(__('popular_title', 'Popular Items')); ?></h2>
+            <p class="section-subtitle"><?= e(__('popular_subtitle', 'Customer favorites baked fresh with passion and precision')); ?></p>
+        </div>
+
+        <div class="product-grid">
+            <?php foreach ($popularProducts as $popItem): 
+                $isFav = isProductFavorited($pdo, (int)$popItem['id']);
+            ?>
+                <div class="product-card">
+                    <div class="product-img-wrapper">
+                        <div class="product-badges">
+                            <?= renderAvailabilityBadge($popItem['availability']); ?>
+                            <?php if (!empty($popItem['is_popular'])): ?>
+                                <span class="badge badge-popular"><?= e(__('badge_popular', isJapanese() ? '人気' : 'Popular')); ?></span>
+                            <?php endif; ?>
+                        </div>
+                        <button type="button" class="btn-favorite <?= $isFav ? 'active' : ''; ?>" data-product-id="<?= $popItem['id']; ?>" title="<?= e(__('add_to_favorites', 'Favorite')); ?>">
+                            ♥
+                        </button>
+                        <a href="product.php?id=<?= $popItem['id']; ?>" class="product-img-link">
+                            <img src="../uploads/products/<?= e($popItem['image']); ?>" alt="<?= e(getLocalized($popItem, 'name')); ?>" onerror="this.src='../assets/images/logo_banner.jpg'">
+                        </a>
+                    </div>
+
+                    <div class="product-body">
+                        <div>
+                            <div class="product-category-tag"><?= e(getLocalized($popItem, 'category_name')); ?></div>
+                            <h3 class="product-title">
+                                <a href="product.php?id=<?= $popItem['id']; ?>"><?= e(getLocalized($popItem, 'name')); ?></a>
+                            </h3>
+                            <p class="product-desc"><?= e(getLocalized($popItem, 'description')); ?></p>
+                        </div>
+
+                        <div class="product-stock-indicator">
+                            <span class="stock-dot"></span>
+                            <span class="stock-text"><?= (int)$popItem['stock']; ?> <?= e(__('units_available', 'units in stock')); ?></span>
+                        </div>
+
+                        <div class="product-footer">
+                            <div class="price-container">
+                                <span class="product-price"><?= formatPrice($popItem['price']); ?></span>
+                            </div>
+
+                            <form action="cart.php" method="POST" class="add-to-cart-form">
+                                <input type="hidden" name="action" value="add">
+                                <input type="hidden" name="product_id" value="<?= $popItem['id']; ?>">
+                                <input type="hidden" name="quantity" value="1">
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <?= e(__('add_to_cart', 'Add to Cart')); ?>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+<?php endif; ?>
 
 <!-- Brand Values Bar -->
 <div class="brand-values-strip">
@@ -503,7 +657,7 @@ $seasonalProducts = $seasonStmt->fetchAll(PDO::FETCH_ASSOC);
         <div class="brand-story-grid">
             <div class="brand-story-visual">
                 <div class="brand-story-img-frame">
-                    <img src="../uploads/banners/banner1.png" alt="Sweet Choice Artisan Pastry Prep" class="brand-story-img" onerror="this.src='../assets/images/logo_banner.jpg'">
+                    <img src="../uploads/banners/abtus.png" alt="Sweet Choice Artisan Pastry Prep" class="brand-story-img" onerror="this.src='../assets/images/logo_banner.jpg'">
                 </div>
                 <div class="brand-story-stat-card">
                     <span class="stat-number">2021</span>
