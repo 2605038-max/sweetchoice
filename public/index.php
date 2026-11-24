@@ -184,15 +184,15 @@ if ($remainingSlots > 0) {
                     <div class="slide-overlay"></div>
                     <div class="slide-content">
                         <span class="slide-atelier-badge">ATELIER GINZA TOKYO</span>
-                        <h1 class="slide-title"><?= e(getLocalized($banner, 'title') ?: __('hero_title', 'Discover Your Perfect Sweet Moment.')); ?></h1>
-                        <p class="slide-subtitle"><?= e(getLocalized($banner, 'subtitle') ?: __('hero_subtitle', 'Handcrafted desserts, thoughtfully selected to make every moment special.')); ?></p>
+                        <h1 class="slide-title"><?= e(getLocalized($banner, 'title') ?: __('hero_title', isJapanese() ? '心ほどける、特別な甘いひとときを。' : 'Discover Your Perfect Sweet Moment.')); ?></h1>
+                        <p class="slide-subtitle"><?= e(getLocalized($banner, 'subtitle') ?: __('hero_subtitle', isJapanese() ? '選び抜かれた素材と職人の手仕事で、日常に寄り添う至福のスイーツをお届けします。' : 'Handcrafted desserts, thoughtfully selected to make every moment special.')); ?></p>
                         
                         <div class="hero-cta-group">
                             <a href="category.php" class="btn btn-primary btn-lg">
-                                <?= e(__('hero_cta_explore', 'Explore Our Collection')); ?>
+                                <?= e(__('hero_cta_explore', isJapanese() ? 'コレクションを見る' : 'Explore Our Collection')); ?>
                             </a>
                             <a href="#ai-recommendation-section" class="btn btn-secondary btn-lg">
-                                <?= e(__('hero_cta_sommelier', 'Find Your Perfect Dessert')); ?>
+                                <?= e(__('hero_cta_sommelier', isJapanese() ? 'おすすめデザートを見つける' : 'Find Your Perfect Dessert')); ?>
                             </a>
                         </div>
                     </div>

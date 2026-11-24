@@ -11,6 +11,8 @@ if (session_status() === PHP_SESSION_NONE) {
 // Handle explicit language change request
 if (isset($_GET['lang']) && in_array($_GET['lang'], ['en', 'ja'], true)) {
     $_SESSION['lang'] = $_GET['lang'];
+    $_SESSION['lang_chosen'] = true;
+    setcookie('sweetchoice_lang', $_GET['lang'], time() + (86400 * 30), '/');
     // Preserve current URL without ?lang= parameter or redirect back cleanly
     $redirect_url = strtok($_SERVER['REQUEST_URI'], '?');
     $query_params = $_GET;
@@ -22,16 +24,23 @@ if (isset($_GET['lang']) && in_array($_GET['lang'], ['en', 'ja'], true)) {
     exit;
 }
 
-// Default to English if not set
-if (empty($_SESSION['lang'])) {
-    $_SESSION['lang'] = 'en';
+// Default to Japanese if not explicitly set or chosen
+if (empty($_SESSION['lang_chosen'])) {
+    if (!empty($_COOKIE['sweetchoice_lang']) && in_array($_COOKIE['sweetchoice_lang'], ['en', 'ja'], true)) {
+        $_SESSION['lang'] = $_COOKIE['sweetchoice_lang'];
+        $_SESSION['lang_chosen'] = true;
+    } else {
+        $_SESSION['lang'] = 'ja';
+    }
+} elseif (empty($_SESSION['lang'])) {
+    $_SESSION['lang'] = 'ja';
 }
 
 /**
  * Get current active language code ('en' or 'ja')
  */
 function getCurrentLang(): string {
-    return $_SESSION['lang'] ?? 'en';
+    return $_SESSION['lang'] ?? 'ja';
 }
 
 /**
@@ -96,8 +105,10 @@ $translations = [
         'brand_pillar_3_desc' => 'Lightly sweetened to allow natural aromatics and delicate textures to shine.',
         'categories_title' => 'Dessert Categories',
         'categories_subtitle' => 'Explore our handcrafted delicacies collections',
+        'popular_tag' => 'Boutique Favorites',
         'popular_title' => 'Popular Items',
         'popular_subtitle' => 'Customer favorites baked fresh with passion and precision',
+        'badge_popular' => 'Popular',
         'seasonal_title' => 'Seasonal Special Collection',
         'seasonal_subtitle' => 'Limited-edition treats for seasonal events and celebrations',
         'view_all' => 'View All',
@@ -325,8 +336,10 @@ $translations = [
         'brand_pillar_3_desc' => '甘さを抑え、素材が持つ繊細な香りと食感を大切にした味わいをお届けします。',
         'categories_title' => 'スイーツカテゴリー',
         'categories_subtitle' => 'こだわりのスイーツコレクションをお楽しみください',
+        'popular_tag' => '厳選人気商品',
         'popular_title' => '人気のデザート',
         'popular_subtitle' => '多くのお客様に愛されている当店自慢の定番スイーツ',
+        'badge_popular' => '人気',
         'seasonal_title' => '季節の限定コレクション',
         'seasonal_subtitle' => '季節のイベントやお祝いを彩る限定スイーツ',
         'view_all' => 'すべて見る',
@@ -514,6 +527,9 @@ function __(string $key, ?string $fallback = null): string {
     if (isset($translations[$lang][$key])) {
         return $translations[$lang][$key];
     }
+    if (isset($translations['ja'][$key])) {
+        return $translations['ja'][$key];
+    }
     if (isset($translations['en'][$key])) {
         return $translations['en'][$key];
     }
@@ -529,9 +545,9 @@ function getLocalized(array $item, string $baseField): string {
     if (!empty($item[$specificField])) {
         return $item[$specificField];
     }
-    $enField = $baseField . '_en';
-    if (!empty($item[$enField])) {
-        return $item[$enField];
+    $altField = ($lang === 'ja') ? $baseField . '_en' : $baseField . '_ja';
+    if (!empty($item[$altField])) {
+        return $item[$altField];
     }
     if (isset($item[$baseField])) {
         return (string)$item[$baseField];
