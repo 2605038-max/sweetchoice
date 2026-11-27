@@ -10,41 +10,47 @@ require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../includes/language.php';
 require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/pairings.php';
+require_once __DIR__ . '/../includes/checkout.php';
 
 $pdo = getDB();
-$cartId = getOrCreateCartId($pdo);
 
-// Revalidate all paired discounts in cart against live inventory before processing checkout
-revalidateCartPairingDiscounts($pdo, $cartId);
-
-// Fetch cart items
-$cartStmt = $pdo->prepare("SELECT ci.*, p.name_en, p.name_ja, p.price, p.image, p.stock 
-                          FROM cart_items ci 
-                          JOIN products p ON ci.product_id = p.id 
-                          WHERE ci.cart_id = ?");
-$cartStmt->execute([$cartId]);
-$cartItems = $cartStmt->fetchAll();
-
-if (empty($cartItems)) {
-    header("Location: cart.php");
+// Mandatory Login/Registration at Checkout (guest cart preserved intact)
+if (!isLoggedIn()) {
+    $_SESSION['intended_redirect'] = 'checkout-start.php';
+    header('Location: login.php?from=checkout');
     exit;
 }
 
-// Calculate totals taking pairing discounts into account
-$productSubtotal = 0;
-$pairingDiscountTotal = 0;
-$customizationTotal = 0;
-foreach ($cartItems as $item) {
-    $qty = (int)$item['quantity'];
-    $unitDisc = (int)($item['discount_amount'] ?? 0);
-    $productSubtotal += ((int)$item['price'] * $qty);
-    $pairingDiscountTotal += ($unitDisc * $qty);
-    $customizationTotal += ((int)$item['customization_price'] * $qty);
+$userId = (int)$_SESSION['user_id'];
+$cartId = getOrCreateCartId($pdo);
+$totals = calculateCartTotals($pdo, $cartId);
+$cartItems = $totals['items'];
+
+if (empty($cartItems)) {
+    header('Location: cart.php');
+    exit;
 }
 
-$effectiveProductSubtotal = max(0, $productSubtotal - $pairingDiscountTotal);
-// Service fee applies ONLY to Local Delivery
-$configuredServiceFee = (int)getShopSetting($pdo, 'service_fee', '150');
+$checkoutSession = getOrCreateCheckoutSession($pdo, $userId, $cartId, $totals);
+if (!empty($checkoutSession['discount_just_voided'])) {
+    setFlash('info', __('checkout_discount_voided', 'Your cart subtotal dropped below ¥3,000, so the mini-game discount was removed.'));
+}
+
+// Route eligible customers who haven't visited the mini-game stage yet to checkout-game.php
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' && $totals['is_minigame_eligible'] && $checkoutSession['game_stage'] === 'pending') {
+    header('Location: checkout-game.php');
+    exit;
+}
+
+$productSubtotal = $totals['eligible_product_subtotal'];
+$pairingDiscountTotal = $totals['pairing_discount_total'];
+$effectiveProductSubtotal = $totals['effective_product_subtotal'];
+$customizationTotal = $totals['customization_total'];
+$isMinigameEligible = $totals['is_minigame_eligible'];
+$gameDiscountAmount = ($isMinigameEligible && $checkoutSession['game_discount_status'] === 'earned')
+    ? min(MINIGAME_DISCOUNT_AMOUNT, (int)$checkoutSession['game_discount_amount'])
+    : 0;
+$configuredServiceFee = 0;
 
 // Fetch Delivery Distance Tiers from MySQL
 $tiersStmt = $pdo->query("SELECT * FROM delivery_settings WHERE is_active = 1 ORDER BY min_km ASC");
@@ -276,117 +282,165 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         }
     }
 
+    $submittedToken = trim($_POST['submit_token'] ?? '');
+    if ($submittedToken === '' || empty($checkoutSession['submit_token']) || !hash_equals($checkoutSession['submit_token'], $submittedToken)) {
+        $errors[] = __('checkout_err_duplicate_submit', 'This order has already been submitted. Please check your Order History.');
+    }
+
+    if ($totals['has_stock_issue']) {
+        $errors[] = __('checkout_err_stock', 'Some items in your cart are out of stock or exceed available inventory. Please review your cart.');
+    }
+
     if (empty($errors)) {
-        // Double-check strict service fee rule: ONLY Local Delivery gets service fee & delivery fee
         if ($fulfillment !== 'delivery') {
-            $appliedServiceFee = 0;
             $deliveryFee = 0;
             $distanceKm = 0.0;
         }
-
-        $grandTotal = $effectiveProductSubtotal + $customizationTotal + $appliedServiceFee + $deliveryFee;
+        $appliedServiceFee = 0;
         $orderNumber = 'SWC-' . date('Ymd') . '-' . strtoupper(substr(bin2hex(random_bytes(3)), 0, 5));
-        $userId = $user ? (int)$user['id'] : null;
         $paymentStatus = ($paymentMethod === 'cash') ? 'pending' : 'paid';
 
         try {
             $pdo->beginTransaction();
 
-            // 1. Insert into orders (never storing any sensitive card data)
-            $orderInsert = $pdo->prepare("INSERT INTO orders 
-                (order_number, user_id, fulfillment_type, pickup_date, pickup_time, delivery_date, delivery_time, distance_km, customer_name, customer_email, customer_phone, postal_code, address, apartment, subtotal, customization_total, pairing_discount_total, delivery_fee, service_fee, grand_total, payment_method, payment_provider, payment_status, status, notes, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Order Received', ?, NOW())");
+            // Lock checkout session to prevent duplicate submission or double discount application
+            $lockStmt = $pdo->prepare("
+                SELECT id, status, order_id, submit_token, game_discount_amount, game_discount_status
+                FROM checkout_sessions
+                WHERE id = ? AND user_id = ?
+                FOR UPDATE
+            ");
+            $lockStmt->execute([$checkoutSession['id'], $userId]);
+            $lockedSession = $lockStmt->fetch();
 
-            $orderInsert->execute([
-                $orderNumber,
-                $userId,
-                $fulfillment,
-                $fulfillment === 'pickup' ? $pickupDate : null,
-                $fulfillment === 'pickup' ? $pickupTime : null,
-                $fulfillment === 'delivery' ? $deliveryDate : null,
-                $fulfillment === 'delivery' ? $deliveryTime : null,
-                $distanceKm,
-                $name,
-                $email,
-                $phone,
-                $fulfillment === 'delivery' ? $postalCode : null,
-                $fulfillment === 'delivery' ? $address : null,
-                $fulfillment === 'delivery' ? $apartment : null,
-                $effectiveProductSubtotal,
-                $customizationTotal,
-                $pairingDiscountTotal,
-                $deliveryFee,
-                $appliedServiceFee,
-                $grandTotal,
-                $paymentMethod,
-                $savedPaymentProvider,
-                $paymentStatus,
-                $notes
-            ]);
-            $orderId = (int)$pdo->lastInsertId();
+            if (
+                !$lockedSession ||
+                $lockedSession['status'] !== 'active' ||
+                !empty($lockedSession['order_id']) ||
+                empty($lockedSession['submit_token']) ||
+                !hash_equals($lockedSession['submit_token'], $submittedToken)
+            ) {
+                $pdo->rollBack();
+                $errors[] = __('checkout_err_duplicate_submit', 'This order has already been submitted. Please check your Order History.');
+            } else {
+                $freshTotals = calculateCartTotals($pdo, $cartId);
+                $appliedGameDiscount = (
+                    $freshTotals['is_minigame_eligible'] &&
+                    $lockedSession['game_discount_status'] === 'earned'
+                ) ? min(MINIGAME_DISCOUNT_AMOUNT, max(0, (int)$lockedSession['game_discount_amount'])) : 0;
 
-            // 2. Insert order items & customizations
-            $itemInsert = $pdo->prepare("INSERT INTO order_items 
-                (order_id, product_id, product_name, price, original_price, discount_amount, pairing_product_id, quantity, customization_summary, customization_price, subtotal)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                $grandTotal = calculateFinalPayableTotal($freshTotals, $deliveryFee, $appliedGameDiscount);
 
-            $customInsert = $pdo->prepare("INSERT INTO order_customizations 
-                (order_item_id, group_name, option_name, price_extra) VALUES (?, ?, ?, ?)");
+                // 1. Insert into orders (never storing any sensitive card data)
+                $orderInsert = $pdo->prepare("INSERT INTO orders 
+                    (order_number, user_id, fulfillment_type, pickup_date, pickup_time, delivery_date, delivery_time, distance_km, customer_name, customer_email, customer_phone, postal_code, address, apartment, subtotal, customization_total, pairing_discount_total, game_discount_total, checkout_session_id, delivery_fee, service_fee, grand_total, payment_method, payment_provider, payment_status, status, notes, created_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Order Received', ?, NOW())");
 
-            foreach ($cartItems as $cItem) {
-                $unitDisc = (int)($cItem['discount_amount'] ?? 0);
-                $unitFinalPrice = max(0, (int)$cItem['price'] - $unitDisc);
-                $lineSubtotal = ($unitFinalPrice + (int)$cItem['customization_price']) * (int)$cItem['quantity'];
-
-                $itemInsert->execute([
-                    $orderId,
-                    $cItem['product_id'],
-                    $cItem['name_en'],
-                    $unitFinalPrice,
-                    $cItem['price'],
-                    $unitDisc,
-                    $cItem['pairing_product_id'] ?? null,
-                    $cItem['quantity'],
-                    $cItem['customization_summary'],
-                    $cItem['customization_price'],
-                    $lineSubtotal
+                $orderInsert->execute([
+                    $orderNumber,
+                    $userId,
+                    $fulfillment,
+                    $fulfillment === 'pickup' ? $pickupDate : null,
+                    $fulfillment === 'pickup' ? $pickupTime : null,
+                    $fulfillment === 'delivery' ? $deliveryDate : null,
+                    $fulfillment === 'delivery' ? $deliveryTime : null,
+                    $distanceKm,
+                    $name,
+                    $email,
+                    $phone,
+                    $fulfillment === 'delivery' ? $postalCode : null,
+                    $fulfillment === 'delivery' ? $address : null,
+                    $fulfillment === 'delivery' ? $apartment : null,
+                    $freshTotals['effective_product_subtotal'],
+                    $freshTotals['customization_total'],
+                    $freshTotals['pairing_discount_total'],
+                    $appliedGameDiscount,
+                    (int)$lockedSession['id'],
+                    $deliveryFee,
+                    0,
+                    $grandTotal,
+                    $paymentMethod,
+                    $savedPaymentProvider,
+                    $paymentStatus,
+                    $notes
                 ]);
-                $orderItemId = (int)$pdo->lastInsertId();
+                $orderId = (int)$pdo->lastInsertId();
 
-                if (!empty($cItem['customization_summary'])) {
-                    $parts = explode(' | ', $cItem['customization_summary']);
-                    foreach ($parts as $part) {
-                        $subParts = explode(': ', $part, 2);
-                        $gName = trim($subParts[0] ?? 'Option');
-                        $oName = trim($subParts[1] ?? '');
-                        $customInsert->execute([$orderItemId, $gName, $oName, 0]);
+                // 2. Insert order items & customizations
+                $itemInsert = $pdo->prepare("INSERT INTO order_items 
+                    (order_id, product_id, product_name, price, original_price, discount_amount, pairing_product_id, quantity, customization_summary, customization_price, subtotal)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
+                $customInsert = $pdo->prepare("INSERT INTO order_customizations 
+                    (order_item_id, group_name, option_name, price_extra) VALUES (?, ?, ?, ?)");
+
+                foreach ($freshTotals['items'] as $cItem) {
+                    $unitDisc = (int)($cItem['discount_amount'] ?? 0);
+                    $unitFinalPrice = max(0, (int)$cItem['price'] - $unitDisc);
+                    $lineSubtotal = ($unitFinalPrice + (int)$cItem['customization_price']) * (int)$cItem['quantity'];
+
+                    $itemInsert->execute([
+                        $orderId,
+                        $cItem['product_id'],
+                        $cItem['name_en'],
+                        $unitFinalPrice,
+                        $cItem['price'],
+                        $unitDisc,
+                        $cItem['pairing_product_id'] ?? null,
+                        $cItem['quantity'],
+                        $cItem['customization_summary'],
+                        $cItem['customization_price'],
+                        $lineSubtotal
+                    ]);
+                    $orderItemId = (int)$pdo->lastInsertId();
+
+                    if (!empty($cItem['customization_summary'])) {
+                        $parts = explode(' | ', $cItem['customization_summary']);
+                        foreach ($parts as $part) {
+                            $subParts = explode(': ', $part, 2);
+                            $gName = trim($subParts[0] ?? 'Option');
+                            $oName = trim($subParts[1] ?? '');
+                            $customInsert->execute([$orderItemId, $gName, $oName, 0]);
+                        }
                     }
+
+                    // Decrement stock
+                    $updStock = $pdo->prepare("UPDATE products SET stock = GREATEST(0, stock - ?) WHERE id = ?");
+                    $updStock->execute([$cItem['quantity'], $cItem['product_id']]);
                 }
 
-                // Decrement stock
-                $updStock = $pdo->prepare("UPDATE products SET stock = GREATEST(0, stock - ?) WHERE id = ?");
-                $updStock->execute([$cItem['quantity'], $cItem['product_id']]);
+                // 3. Mark checkout session completed & prevent reuse
+                $finalDiscStatus = $appliedGameDiscount > 0 ? 'applied' : $lockedSession['game_discount_status'];
+                $closeSession = $pdo->prepare("
+                    UPDATE checkout_sessions
+                    SET status = 'completed', game_stage = 'done', game_discount_amount = ?, game_discount_status = ?, order_id = ?, submit_token = NULL, updated_at = NOW()
+                    WHERE id = ?
+                ");
+                $closeSession->execute([$appliedGameDiscount, $finalDiscStatus, $orderId, (int)$lockedSession['id']]);
+
+                // 4. Clear cart items
+                $clearCart = $pdo->prepare("DELETE FROM cart_items WHERE cart_id = ?");
+                $clearCart->execute([$cartId]);
+
+                $pdo->commit();
+
+                $_SESSION['recent_order_numbers'] = $_SESSION['recent_order_numbers'] ?? [];
+                $_SESSION['recent_order_numbers'][] = $orderNumber;
+
+                header("Location: order-confirmation.php?order=" . urlencode($orderNumber));
+                exit;
             }
-
-            // 3. Clear cart items
-            $clearCart = $pdo->prepare("DELETE FROM cart_items WHERE cart_id = ?");
-            $clearCart->execute([$cartId]);
-
-            $pdo->commit();
-
-            // Redirect to Order Confirmation
-            header("Location: order-confirmation.php?order=" . urlencode($orderNumber));
-            exit;
-
         } catch (Exception $e) {
-            $pdo->rollBack();
-            $errors[] = "An unexpected error occurred while placing your order: " . $e->getMessage();
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            error_log('Checkout place_order error: ' . $e->getMessage());
+            $errors[] = __('checkout_err_unexpected', 'An unexpected error occurred while placing your order. Please try again.');
         }
     }
 }
 
-// Compute initial summary numbers for server-side render (strictly NO service fee unless delivery)
-$initialServiceFee = ($selectedFulfillment === 'delivery') ? $configuredServiceFee : 0;
+$initialServiceFee = 0;
 $initialDeliveryFee = 0;
 if ($selectedFulfillment === 'delivery' && !empty($deliveryTiers)) {
     foreach ($deliveryTiers as $tier) {
@@ -396,17 +450,35 @@ if ($selectedFulfillment === 'delivery' && !empty($deliveryTiers)) {
         }
     }
 }
-$initialGrandTotal = $effectiveProductSubtotal + $customizationTotal + $initialServiceFee + $initialDeliveryFee;
+$initialGrandTotal = calculateFinalPayableTotal($totals, $initialDeliveryFee, $gameDiscountAmount);
 
 $pageTitle = __('checkout_title', 'Checkout');
 require_once __DIR__ . '/../includes/header.php';
 ?>
 
-<div class="container" style="padding: 40px 20px;">
-    <div class="section-header" style="text-align:left; margin-bottom:24px;">
-        <span class="section-tag"><?= e(__('checkout_title', 'Checkout')); ?></span>
-        <h1 class="section-title"><?= isJapanese() ? 'ご注文・お受取り手続き' : 'Fulfillment & Checkout'; ?></h1>
+<div class="container checkout-page-wrap">
+    <div class="checkout-page-header">
+        <div>
+            <span class="section-tag"><?= e(__('checkout_title', 'Checkout')); ?></span>
+            <h1 class="section-title checkout-page-title"><?= isJapanese() ? 'ご注文・お受取り手続き' : 'Fulfillment & Checkout'; ?></h1>
+        </div>
+        <div class="checkout-header-actions">
+            <?php if ($isMinigameEligible): ?>
+                <a href="checkout-game.php" class="btn btn-secondary btn-sm">&larr; <?= e(__('checkout_back_to_game', 'Back to Mini-Game')); ?></a>
+            <?php endif; ?>
+            <a href="cart.php" class="btn btn-secondary btn-sm">&larr; <?= e(__('checkout_back_to_cart', 'Back to Cart')); ?></a>
+        </div>
     </div>
+
+    <?php if ($gameDiscountAmount > 0): ?>
+        <div class="alert alert-success" style="margin-bottom:20px;">
+            🎉 <strong><?= e(__('minigame_congrats_discount', 'Congratulations! You earned a ¥200 discount!')); ?></strong>
+        </div>
+    <?php elseif (!$isMinigameEligible): ?>
+        <div class="alert alert-info" style="margin-bottom:20px;">
+            ℹ️ <?= e(__('minigame_not_qualified_msg', 'Your order does not meet the ¥3,000 minimum purchase requirement (product subtotal only).')); ?>
+        </div>
+    <?php endif; ?>
 
     <?php if (!empty($errors)): ?>
         <div class="alert alert-danger" id="checkout-server-error">
@@ -425,7 +497,8 @@ require_once __DIR__ . '/../includes/header.php';
     <form action="checkout.php" method="POST" id="checkout-form" novalidate
           data-subtotal="<?= $effectiveProductSubtotal; ?>"
           data-custom="<?= $customizationTotal; ?>"
-          data-service-fee="<?= $configuredServiceFee; ?>"
+          data-service-fee="0"
+          data-game-discount="<?= $gameDiscountAmount; ?>"
           data-lang="<?= e(getCurrentLang()); ?>"
           data-label-dine-in="<?= e(__('dine_in_option', 'Dine-in (店内)')); ?>"
           data-label-pickup="<?= e(__('pickup_option', 'Store Pickup')); ?>"
@@ -433,6 +506,7 @@ require_once __DIR__ . '/../includes/header.php';
           data-label-not-selected="<?= e(__('not_selected', 'Not selected')); ?>">
         <input type="hidden" name="action" value="place_order">
         <input type="hidden" name="csrf_token" value="<?= getCsrfToken(); ?>">
+        <input type="hidden" name="submit_token" value="<?= e($checkoutSession['submit_token'] ?? ''); ?>">
 
         <div class="checkout-layout">
             <!-- Left Column: Forms -->
@@ -810,11 +884,12 @@ require_once __DIR__ . '/../includes/header.php';
                         </div>
                     <?php endif; ?>
 
-                    <!-- Service Fee: ONLY displayed and added for Local Delivery -->
-                    <div class="summary-row" id="checkout-service-fee-row" style="display:<?= $selectedFulfillment === 'delivery' ? 'flex' : 'none'; ?>;">
-                        <span><?= e(__('service_fee', 'Service Fee')); ?>:</span>
-                        <span id="checkout-service-fee"><?= formatPrice($initialServiceFee); ?></span>
-                    </div>
+                    <?php if ($gameDiscountAmount > 0): ?>
+                        <div class="summary-row" style="color:#2E7D32; font-weight:700; background:#EDF9EA; padding:6px 10px; border-radius:6px; margin:6px -10px;">
+                            <span>🎮 <?= e(__('checkout_minigame_discount', 'Mini-Game Discount')); ?>:</span>
+                            <span>-<?= formatPrice($gameDiscountAmount); ?></span>
+                        </div>
+                    <?php endif; ?>
 
                     <!-- Delivery Fee: ONLY displayed and added for Local Delivery -->
                     <div class="summary-row" id="checkout-delivery-fee-row" style="display:<?= $selectedFulfillment === 'delivery' ? 'flex' : 'none'; ?>;">

@@ -8,6 +8,7 @@ require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../includes/language.php';
 require_once __DIR__ . '/../includes/pairings.php';
+require_once __DIR__ . '/../includes/checkout.php';
 
 $pdo = getDB();
 $cartId = getOrCreateCartId($pdo);
@@ -151,10 +152,12 @@ $pageTitle = __('cart_title', 'Shopping Cart');
 require_once __DIR__ . '/../includes/header.php';
 ?>
 
-<div class="container" style="padding: 40px 20px;">
-    <div class="section-header" style="text-align:left; margin-bottom:24px;">
-        <span class="section-tag"><?= e(__('nav_cart', 'Cart')); ?></span>
-        <h1 class="section-title"><?= e(__('cart_title', 'Shopping Cart')); ?></h1>
+<div class="container checkout-page-wrap">
+    <div class="checkout-page-header">
+        <div>
+            <span class="section-tag"><?= e(__('nav_cart', 'Cart')); ?></span>
+            <h1 class="section-title checkout-page-title"><?= e(__('cart_title', 'Shopping Cart')); ?></h1>
+        </div>
     </div>
 
     <?php if (empty($items)): ?>
@@ -170,14 +173,15 @@ require_once __DIR__ . '/../includes/header.php';
         <div class="cart-layout">
             <!-- Items Table -->
             <div class="cart-table-wrapper">
+                <div class="cart-table-scroll">
                 <table class="cart-table">
                     <thead>
                         <tr>
                             <th><?= e(__('item', 'Item')); ?></th>
-                            <th><?= e(__('price', 'Price')); ?></th>
-                            <th style="text-align:center;"><?= e(__('quantity', 'Quantity')); ?></th>
-                            <th style="text-align:right;"><?= e(__('subtotal', 'Subtotal')); ?></th>
-                            <th></th>
+                            <th class="col-price"><?= e(__('price', 'Price')); ?></th>
+                            <th class="col-qty"><?= e(__('quantity', 'Quantity')); ?></th>
+                            <th class="col-subtotal"><?= e(__('subtotal', 'Subtotal')); ?></th>
+                            <th class="col-remove"></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -231,35 +235,36 @@ require_once __DIR__ . '/../includes/header.php';
                                         <div style="font-size:0.8rem; color:var(--color-deep-plum);">+<?= formatPrice($item['customization_price']); ?> (opt)</div>
                                     <?php endif; ?>
                                 </td>
-                                <td style="text-align:center;">
-                                    <form action="cart.php" method="POST" style="display:inline-flex; align-items:center;">
+                                <td class="col-qty">
+                                    <form action="cart.php" method="POST" style="display:inline-flex; align-items:center; margin:0;">
                                         <input type="hidden" name="action" value="update">
                                         <input type="hidden" name="item_id" value="<?= $item['id']; ?>">
-                                        <div class="qty-control" style="transform:scale(0.85);">
-                                            <button type="button" class="qty-btn qty-minus">&minus;</button>
+                                        <div class="qty-control cart-qty-control">
+                                            <button type="button" class="qty-btn qty-minus" aria-label="Decrease">&minus;</button>
                                             <input type="number" name="quantity" value="<?= $item['quantity']; ?>" min="1" max="<?= $item['stock']; ?>" class="qty-input" onchange="this.form.submit();">
-                                            <button type="button" class="qty-btn qty-plus">+</button>
+                                            <button type="button" class="qty-btn qty-plus" aria-label="Increase">+</button>
                                         </div>
                                     </form>
                                 </td>
-                                <td style="text-align:right; font-weight:700; color:var(--color-deep-plum);">
+                                <td class="col-subtotal cart-line-subtotal">
                                     <?= formatPrice($lineSubtotal); ?>
                                 </td>
-                                <td style="text-align:right;">
-                                    <form action="cart.php" method="POST" onsubmit="return confirm('Remove this item?');" style="margin:0;">
+                                <td class="col-remove">
+                                    <form action="cart.php" method="POST" onsubmit="return confirm('<?= e(__('cart_remove_confirm', 'Remove this item from your cart?')); ?>');" style="margin:0;">
                                         <input type="hidden" name="action" value="remove">
                                         <input type="hidden" name="item_id" value="<?= $item['id']; ?>">
-                                        <button type="submit" class="btn btn-secondary btn-sm" style="padding:4px 10px; border-radius:var(--radius-full); font-size:0.75rem;" title="Remove">✕</button>
+                                        <button type="submit" class="cart-remove-btn" title="Remove" aria-label="Remove">✕</button>
                                     </form>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
+                </div>
 
-                <div style="margin-top:24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                <div class="cart-table-footer">
                     <a href="category.php" class="btn btn-secondary btn-sm">&larr; <?= e(__('continue_shopping', 'Continue Shopping')); ?></a>
-                    <div style="font-size:0.85rem; color:var(--color-secondary-text);">
+                    <div class="cart-delivery-tip">
                         🌸 <?= e(__('free_delivery_tip', 'Distance tiers: 0-3km: ¥300 | 3-5km: ¥500 | 5-10km: ¥800')); ?>
                     </div>
                 </div>
@@ -289,11 +294,6 @@ require_once __DIR__ . '/../includes/header.php';
                 <?php endif; ?>
 
                 <div class="summary-row" style="color:var(--color-secondary-text); font-size:0.85rem;">
-                    <span><?= e(__('service_fee', 'Service Fee')); ?>:</span>
-                    <span><?= e(__('service_fee_delivery_only', 'Local Delivery only')); ?></span>
-                </div>
-
-                <div class="summary-row" style="color:var(--color-secondary-text); font-size:0.85rem;">
                     <span><?= e(__('delivery_fee', 'Delivery Fee')); ?>:</span>
                     <span><?= isJapanese() ? '注文手続き時に計算' : 'Calculated at checkout'; ?></span>
                 </div>
@@ -303,8 +303,29 @@ require_once __DIR__ . '/../includes/header.php';
                     <span><?= formatPrice($grandTotal); ?></span>
                 </div>
 
-                <div style="margin-top:24px;">
-                    <a href="checkout.php" class="btn btn-primary btn-block btn-lg">
+                <?php
+                    $eligPct = min(100, (int)round(($productSubtotal / MINIGAME_MIN_SUBTOTAL) * 100));
+                ?>
+                <?php if ($productSubtotal >= MINIGAME_MIN_SUBTOTAL): ?>
+                    <div class="cart-minigame-banner is-eligible">
+                        <div class="cart-mg-header">
+                            <span>🎮 <strong><?= e(__('minigame_qualified_msg', 'Your order qualifies for the mini-game!')); ?></strong></span>
+                        </div>
+                        <div class="cart-mg-progress"><div class="cart-mg-progress-fill" style="width:100%;"></div></div>
+                        <p class="cart-mg-desc"><?= e(__('cart_minigame_eligible_hint', 'Play Sweet Run during checkout for a chance to earn a ¥200 discount.')); ?></p>
+                    </div>
+                <?php else: ?>
+                    <div class="cart-minigame-banner is-pending">
+                        <div class="cart-mg-header">
+                            <span>🎮 <?= e(sprintf(__('cart_minigame_need_more_hint', 'Add %s more in products to unlock the Sweet Run Mini-Game for a ¥200 discount!'), formatPrice(MINIGAME_MIN_SUBTOTAL - $productSubtotal))); ?></span>
+                        </div>
+                        <div class="cart-mg-progress"><div class="cart-mg-progress-fill" style="width:<?= $eligPct; ?>%;"></div></div>
+                        <div class="cart-mg-note"><?= e(__('cart_subtotal_note', 'Only product prices × quantities count toward the ¥3,000 mini-game minimum.')); ?></div>
+                    </div>
+                <?php endif; ?>
+
+                <div style="margin-top:20px;">
+                    <a href="checkout-start.php" class="btn btn-primary btn-block btn-lg">
                         <?= e(__('proceed_to_checkout', 'Proceed to Checkout')); ?> &rarr;
                     </a>
                 </div>

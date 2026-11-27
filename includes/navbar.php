@@ -43,8 +43,8 @@ $currentLang = getCurrentLang();
             </li>
             <!-- Mini Game Navigation Item(new) -->
             <li class="nav-item">
-                <a href="game/index.html" class="nav-game-link" title="<?= isJapanese() ? '走るケーキゲームで遊ぶ' : 'Play Running Cake Game'; ?>">
-                    <span style="margin-right: 4px;"></span><?= isJapanese() ? 'ミニゲーム' : 'Mini Game'; ?>
+                <a href="game/index.html?lang=<?= e($currentLang); ?>" class="nav-game-link" title="<?= isJapanese() ? '走るケーキゲームで遊ぶ' : 'Play Running Cake Game'; ?>">
+                    <span style="margin-right: 4px;">🎮</span><?= isJapanese() ? 'ミニゲーム' : 'Mini Game'; ?>
                 </a>
             </li>
             <?php if (isLoggedIn()): ?>

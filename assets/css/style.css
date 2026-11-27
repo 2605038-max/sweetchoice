@@ -2005,17 +2005,23 @@ body.page-home .hero-slider-section {
 ================================================= */
 .cart-layout, .checkout-layout {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 36px;
-  padding: 36px 0;
+  grid-template-columns: minmax(0, 1.85fr) minmax(320px, 1fr);
+  gap: 32px;
+  align-items: start;
+  padding: 0;
 }
 
 .cart-table-wrapper {
   background: var(--color-card-bg);
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
-  padding: 24px;
+  padding: 24px 26px;
   box-shadow: var(--shadow-sm);
+}
+
+.cart-table-scroll {
+  width: 100%;
+  overflow-x: auto;
 }
 
 .cart-table {
@@ -2025,19 +2031,119 @@ body.page-home .hero-slider-section {
 
 .cart-table th {
   text-align: left;
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--color-border);
-  font-size: 0.86rem;
+  padding: 0 12px 14px 12px;
+  border-bottom: 1.5px solid var(--color-border);
+  font-size: 0.82rem;
   color: var(--color-text-secondary);
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  white-space: nowrap;
 }
 
 .cart-table td {
-  padding: 16px 0;
+  padding: 18px 12px;
   border-bottom: 1px solid var(--color-border-light);
   vertical-align: middle;
+}
+
+.cart-table th:first-child,
+.cart-table td:first-child {
+  padding-left: 0;
+}
+
+.cart-table th:last-child,
+.cart-table td:last-child {
+  padding-right: 0;
+}
+
+.cart-table .col-price,
+.cart-table .col-subtotal {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.cart-table .col-qty {
+  text-align: center;
+  white-space: nowrap;
+}
+
+.cart-table .col-subtotal {
+  text-align: right;
+}
+
+.cart-table .col-remove {
+  text-align: right;
+  width: 42px;
+}
+
+.cart-line-subtotal {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--color-deep-plum);
+}
+
+.cart-qty-control {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--color-bg);
+}
+
+.cart-qty-control .qty-btn {
+  width: 30px;
+  height: 32px;
+  padding: 0;
+  font-size: 0.95rem;
+}
+
+.cart-qty-control .qty-input {
+  width: 42px;
+  height: 32px;
+  font-size: 0.88rem;
+  padding: 0;
+  text-align: center;
+  border: none;
+  background: #FFFFFF;
+}
+
+.cart-remove-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-text-secondary);
+  font-size: 0.78rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+
+.cart-remove-btn:hover {
+  background: #FDECEC;
+  border-color: #E2A3A0;
+  color: var(--color-danger);
+}
+
+.cart-table-footer {
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.cart-delivery-tip {
+  font-size: 0.84rem;
+  color: var(--color-text-secondary);
 }
 
 .cart-product-cell {
@@ -2566,5 +2672,717 @@ body.page-home .hero-slider-section {
   .fulfillment-tabs-3,
   .online-provider-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+
+/* ==================================================
+   CHECKOUT PAGES, HORIZONTAL STEPPER & SWEET RUN UI
+================================================== */
+.checkout-page-wrap {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 32px 24px 72px 24px;
+}
+
+.checkout-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 26px;
+}
+
+.checkout-page-title {
+  margin: 8px 0 0 0;
+  font-size: 2.05rem;
+  text-align: left;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.checkout-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.checkout-card {
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  box-shadow: var(--shadow-md);
+}
+
+.auth-card-wrap {
+  max-width: 480px;
+  margin: 12px auto 0 auto;
+}
+
+.auth-card-wrap-wide {
+  max-width: 580px;
+}
+
+.confirmation-content-wrap {
+  max-width: 920px;
+  margin: 0 auto;
+}
+
+/* Professional Horizontal 5-Step Progress Indicator */
+.checkout-stepper {
+  margin-bottom: 30px;
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 18px 28px;
+  box-shadow: var(--shadow-sm);
+}
+
+.checkout-stepper-track {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 8px;
+}
+
+.checkout-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  flex-shrink: 0;
+  min-width: 92px;
+  text-align: center;
+}
+
+.checkout-step-circle {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--color-bg);
+  border: 2px solid var(--color-border);
+  color: var(--color-text-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  transition: var(--transition);
+}
+
+.checkout-step-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  line-height: 1.3;
+  white-space: nowrap;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.checkout-step.is-active .checkout-step-circle {
+  background: var(--color-btn-primary);
+  border-color: var(--color-btn-primary);
+  color: #FFFFFF;
+  box-shadow: 0 0 0 5px rgba(196, 124, 133, 0.22);
+}
+
+.checkout-step.is-active .checkout-step-label {
+  color: var(--color-chocolate);
+  font-weight: 700;
+}
+
+.checkout-step.is-done .checkout-step-circle {
+  background: #EBF7E7;
+  border-color: #6BB367;
+  color: #265B1D;
+}
+
+.checkout-step.is-done .checkout-step-label {
+  color: #265B1D;
+}
+
+.checkout-step.is-upcoming .checkout-step-circle {
+  background: var(--color-cream-soft);
+  border-color: var(--color-border);
+  color: var(--color-accent-natural);
+}
+
+.checkout-step.is-skipped {
+  opacity: 0.65;
+}
+
+.checkout-step.is-skipped .checkout-step-circle {
+  background: var(--color-cream-soft);
+  border: 1.5px dashed var(--color-accent-secondary);
+  color: var(--color-accent-natural);
+}
+
+.checkout-step-skip-tag {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--color-accent-natural);
+  background: var(--color-cream-soft);
+  padding: 1px 7px;
+  border-radius: var(--radius-full);
+}
+
+.checkout-step-connector {
+  flex: 1 1 24px;
+  height: 2px;
+  background: var(--color-border);
+  border-radius: 2px;
+  margin-bottom: 22px;
+  min-width: 16px;
+}
+
+.checkout-step-connector.is-done {
+  background: #7BC676;
+}
+
+/* Cart Mini-Game Eligibility Card inside Summary */
+.cart-minigame-banner {
+  margin-top: 18px;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.cart-minigame-banner.is-eligible {
+  background: #EDF9EA;
+  border: 1px solid #B8E4AE;
+  color: #265B1D;
+}
+
+.cart-minigame-banner.is-pending {
+  background: var(--color-dusty-rose-lt);
+  border: 1px solid var(--color-dusty-rose-border);
+  color: var(--color-chocolate);
+}
+
+.cart-mg-header {
+  margin-bottom: 8px;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.cart-mg-progress {
+  width: 100%;
+  height: 7px;
+  border-radius: var(--radius-full);
+  background: rgba(61, 38, 29, 0.1);
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.cart-mg-progress-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--color-btn-primary);
+  transition: width 0.3s ease;
+}
+
+.cart-minigame-banner.is-eligible .cart-mg-progress-fill {
+  background: #3E8E41;
+}
+
+.cart-mg-desc,
+.cart-mg-note {
+  font-size: 0.78rem;
+  margin: 0;
+  opacity: 0.9;
+}
+
+/* Sweet Run Checkout Promotional Invitation Panel */
+.mg-invite-card {
+  background: linear-gradient(180deg, #FFFFFF 0%, #FFFBF8 100%);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 30px 32px;
+  margin-bottom: 28px;
+  box-shadow: var(--shadow-md);
+}
+
+.mg-invite-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--color-border-light);
+  margin-bottom: 24px;
+}
+
+.mg-invite-subtitle {
+  margin: 10px 0 0 0;
+  color: var(--color-text-secondary);
+  font-size: 0.96rem;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  word-break: keep-all;
+}
+
+.mg-subtotal-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--color-cream-soft);
+  border: 1px solid var(--color-border);
+  color: var(--color-chocolate);
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-size: 0.84rem;
+}
+
+.mg-metrics-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin-bottom: 22px;
+}
+
+.mg-metric-card {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.mg-discount-card {
+  background: var(--color-dusty-rose-lt);
+  border: 1.5px dashed var(--color-dusty-rose-border);
+}
+
+.mg-discount-card.is-earned {
+  background: #EDF9EA;
+  border-color: #6BB367;
+}
+
+.mg-metric-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.mg-metric-value {
+  font-family: var(--font-serif);
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: var(--color-chocolate);
+  line-height: 1.2;
+}
+
+.mg-discount-card.is-earned .mg-metric-value,
+.mg-discount-card.is-earned .mg-metric-sub {
+  color: #265B1D;
+}
+
+.mg-metric-sub {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
+
+.mg-feedback-banner {
+  padding: 14px 18px;
+  border-radius: var(--radius-sm);
+  font-size: 0.94rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+  line-height: 1.55;
+  word-break: keep-all;
+}
+
+.mg-feedback-banner.is-success {
+  background: #EDF9EA;
+  border: 1px solid #9CD396;
+  color: #265B1D;
+}
+
+.mg-feedback-banner.is-info {
+  background: var(--color-cream-soft);
+  border: 1px solid var(--color-border);
+  color: var(--color-chocolate);
+}
+
+.mg-feedback-banner.is-error {
+  background: #FDECEC;
+  border: 1px solid #F2B8B5;
+  color: #A34842;
+}
+
+.mg-action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+}
+
+.mg-invite-actions {
+  justify-content: center;
+  padding: 6px 0 24px 0;
+  border-bottom: 1px solid var(--color-border-light);
+  margin-bottom: 24px;
+}
+
+.mg-invite-actions .btn {
+  min-width: 240px;
+}
+
+.mg-info-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 20px;
+}
+
+.mg-info-panel {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+}
+
+.mg-side-title {
+  font-size: 1.05rem;
+  margin: 0 0 12px 0;
+  color: var(--color-chocolate);
+}
+
+.mg-rules-list {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 0.86rem;
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+}
+
+.mg-rules-list li {
+  margin-bottom: 4px;
+}
+
+.mg-attempt-history {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mg-empty-history {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.mg-history-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  font-size: 0.85rem;
+}
+
+.mg-history-row.is-win {
+  background: #EDF9EA;
+  border-color: #B8E4AE;
+}
+
+.mg-history-type {
+  font-size: 0.76rem;
+  color: var(--color-text-secondary);
+  margin-left: 6px;
+}
+
+.mg-history-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+}
+
+.mg-win-pill {
+  background: #2E7D32;
+  color: #FFFFFF;
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+
+/* Full-Screen 100vw x 100vh Embedded 3D Sweet Run Game Overlay */
+.minigame-fullscreen-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9500;
+  background: #FFF1F5;
+  display: none;
+}
+
+.minigame-fullscreen-overlay.is-open {
+  display: block;
+}
+
+.mg-fs-top-bar {
+  position: fixed;
+  top: 74px;
+  left: 20px;
+  z-index: 9600;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.mg-fs-top-bar > * {
+  pointer-events: auto;
+}
+
+.mg-fs-pill-btn {
+  background: rgba(255, 252, 248, 0.96);
+  color: var(--color-chocolate);
+  border: 1.5px solid var(--color-border);
+  padding: 7px 15px;
+  border-radius: var(--radius-full);
+  font-size: 0.82rem;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(61, 38, 29, 0.14);
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.mg-fs-pill-btn:hover {
+  background: var(--color-btn-primary);
+  color: #FFFFFF;
+  border-color: var(--color-btn-primary);
+}
+
+.mg-fs-goal-pill {
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--color-chocolate);
+  border: 1.5px solid var(--color-dusty-rose-border);
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(61, 38, 29, 0.1);
+  white-space: nowrap;
+}
+
+.minigame-iframe-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #FFF1F5;
+}
+
+.minigame-iframe-wrap iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+
+.minigame-stage-footer {
+  position: fixed;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
+  width: min(92vw, 760px);
+  z-index: 9600;
+  padding: 18px 22px;
+  background: rgba(255, 252, 248, 0.97);
+  backdrop-filter: blur(8px);
+  border: 1.5px solid var(--color-dusty-rose-border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 12px 36px rgba(61, 38, 29, 0.24);
+}
+
+/* Demo Rewarded Advertisement Modal (renders above full-screen game overlay) */
+.demo-ad-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(61, 38, 29, 0.78);
+  backdrop-filter: blur(5px);
+  z-index: 10000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.demo-ad-overlay.is-open {
+  display: flex;
+}
+
+.demo-ad-card {
+  background: var(--color-card-bg);
+  border: 2px solid var(--color-dusty-rose-border);
+  border-radius: var(--radius-lg);
+  max-width: 520px;
+  width: 100%;
+  padding: 30px 28px;
+  text-align: center;
+  box-shadow: var(--shadow-lg);
+}
+
+.demo-ad-top-badge {
+  display: inline-block;
+  background: var(--color-chocolate);
+  color: #FAF6F0;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  padding: 5px 14px;
+  border-radius: var(--radius-full);
+  margin-bottom: 14px;
+}
+
+.demo-ad-headline {
+  font-size: 1.45rem;
+  color: var(--color-chocolate);
+  margin-bottom: 14px;
+  word-break: keep-all;
+}
+
+.demo-ad-visual {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  margin-bottom: 14px;
+  max-height: 190px;
+}
+
+.demo-ad-visual img {
+  width: 100%;
+  height: 190px;
+  object-fit: cover;
+}
+
+.demo-ad-subtext {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 18px;
+  line-height: 1.6;
+}
+
+.demo-ad-progress-wrap {
+  width: 100%;
+  height: 10px;
+  background: var(--color-cream-soft);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-bottom: 10px;
+  border: 1px solid var(--color-border);
+}
+
+.demo-ad-progress-bar {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-btn-primary), #D98A6C);
+  transition: width 0.12s linear;
+}
+
+.demo-ad-countdown {
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: var(--color-btn-primary);
+  margin-bottom: 14px;
+}
+
+.demo-ad-disclaimer {
+  font-size: 0.76rem;
+  color: var(--color-text-secondary);
+  background: var(--color-bg);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-light);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Responsive Adjustments (Desktop, Tablet & Mobile - EN & JA) */
+@media (max-width: 960px) {
+  .cart-layout,
+  .checkout-layout {
+    grid-template-columns: 1fr;
+  }
+  .summary-card {
+    position: static;
+  }
+  .mg-metrics-row {
+    grid-template-columns: 1fr;
+  }
+  .mg-info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .checkout-page-wrap {
+    padding: 20px 14px 48px 14px;
+  }
+  .checkout-stepper {
+    padding: 14px 12px;
+    overflow-x: auto;
+  }
+  .checkout-step {
+    min-width: 68px;
+  }
+  .checkout-step-circle {
+    width: 28px;
+    height: 28px;
+    font-size: 0.78rem;
+  }
+  .checkout-step-label {
+    font-size: 0.7rem;
+  }
+  .checkout-step-connector {
+    min-width: 10px;
+    margin-bottom: 18px;
+  }
+  .mg-invite-card {
+    padding: 20px 18px;
+  }
+  .mg-invite-actions .btn {
+    width: 100%;
+    min-width: 0;
+  }
+  .checkout-card {
+    padding: 22px 18px;
+  }
+  .cart-table-wrapper {
+    padding: 16px;
+  }
+  .mg-fs-top-bar {
+    top: 66px;
+    left: 10px;
+  }
+  .mg-fs-pill-btn,
+  .mg-fs-goal-pill {
+    font-size: 0.72rem;
+    padding: 5px 10px;
+  }
+  .minigame-stage-footer {
+    bottom: 12px;
+    padding: 14px;
   }
 }

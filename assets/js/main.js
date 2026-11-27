@@ -117,6 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const baseSubtotal = parseInt(checkoutForm.getAttribute('data-subtotal'), 10) || 0;
         const customTotal = parseInt(checkoutForm.getAttribute('data-custom'), 10) || 0;
         const configuredServiceFee = parseInt(checkoutForm.getAttribute('data-service-fee'), 10) || 0;
+        const gameDiscount = parseInt(checkoutForm.getAttribute('data-game-discount'), 10) || 0;
 
         const allowedByFulfillment = {
             dine_in: ['credit_card', 'online_pay', 'cash'],
@@ -297,7 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 deliveryFeeDisplay.textContent = '¥' + deliveryFee.toLocaleString('en-US');
             }
 
-            const grand = baseSubtotal + customTotal + appliedServiceFee + deliveryFee;
+            const grand = Math.max(0, baseSubtotal + customTotal + appliedServiceFee + deliveryFee - gameDiscount);
             if (grandTotalDisplay) {
                 grandTotalDisplay.textContent = '¥' + grand.toLocaleString('en-US');
             }
