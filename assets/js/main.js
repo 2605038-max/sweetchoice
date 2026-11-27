@@ -87,6 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const baseSubtotal = parseInt(checkoutForm.getAttribute('data-subtotal'), 10) || 0;
         const customTotal = parseInt(checkoutForm.getAttribute('data-custom'), 10) || 0;
         const serviceFee = parseInt(checkoutForm.getAttribute('data-service-fee'), 10) || 0;
+        const gameDiscount = parseInt(checkoutForm.getAttribute('data-game-discount'), 10) || 0;
 
         function updateCheckoutTotals() {
             const isDelivery = inputFulfillment.value === 'delivery';
@@ -104,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 deliveryFeeDisplay.textContent = '¥' + deliveryFee.toLocaleString('en-US');
             }
 
-            const grand = baseSubtotal + customTotal + serviceFee + deliveryFee;
+            const grand = Math.max(0, baseSubtotal + customTotal + serviceFee + deliveryFee - gameDiscount);
             if (grandTotalDisplay) {
                 grandTotalDisplay.textContent = '¥' + grand.toLocaleString('en-US');
             }
