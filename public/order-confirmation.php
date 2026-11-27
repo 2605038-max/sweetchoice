@@ -84,20 +84,39 @@ require_once __DIR__ . '/../includes/header.php';
         </h3>
 
         <!-- Fulfillment & Customer Info Grid -->
+        <?php
+            $fType = $order['fulfillment_type'];
+            $fIcon = match($fType) {
+                'dine_in' => '🍰 ',
+                'delivery' => '🚚 ',
+                default => '🏬 ',
+            };
+            $fHeading = match($fType) {
+                'dine_in' => __('dine_in_details', 'Dine-in Details'),
+                'delivery' => __('delivery_details', 'Delivery Details'),
+                default => __('pickup_details', 'Pickup Details'),
+            };
+        ?>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:24px; font-size:0.95rem;">
             <div>
                 <h4 style="font-size:1rem; color:var(--color-deep-plum); margin-bottom:8px;">
-                    <?= $order['fulfillment_type'] === 'pickup' ? '🏬 ' . e(__('pickup_details', 'Pickup Details')) : '🚚 ' . e(__('delivery_details', 'Delivery Details')); ?>
+                    <?= $fIcon . e($fHeading); ?>
                 </h4>
-                <p><strong><?= e(__('fulfillment_type', 'Method')); ?>:</strong> <?= ucfirst($order['fulfillment_type']); ?></p>
-                <p>
-                    <strong><?= e(__('scheduled_time', 'Scheduled Time')); ?>:</strong> 
-                    <?= e($order['fulfillment_type'] === 'pickup' ? $order['pickup_date'] . ' (' . $order['pickup_time'] . ')' : $order['delivery_date'] . ' (' . $order['delivery_time'] . ')'); ?>
-                </p>
-                <?php if ($order['fulfillment_type'] === 'delivery'): ?>
+                <p><strong><?= e(__('fulfillment_type', 'Method')); ?>:</strong> <?= e(formatFulfillmentLabel($fType)); ?></p>
+                <?php if ($fType === 'pickup'): ?>
+                    <p>
+                        <strong><?= e(__('scheduled_time', 'Scheduled Time')); ?>:</strong>
+                        <?= e($order['pickup_date'] . ' (' . $order['pickup_time'] . ')'); ?>
+                    </p>
+                    <p><strong>Boutique Address:</strong> Ginza 4-2-11, Chuo-ku, Tokyo (Sweet Choice)</p>
+                <?php elseif ($fType === 'delivery'): ?>
+                    <p>
+                        <strong><?= e(__('scheduled_time', 'Scheduled Time')); ?>:</strong>
+                        <?= e($order['delivery_date'] . ' (' . $order['delivery_time'] . ')'); ?>
+                    </p>
                     <p><strong><?= e(__('street_address', 'Address')); ?>:</strong> <?= e($order['address']); ?> <?= e($order['apartment']); ?> (〒<?= e($order['postal_code']); ?>)</p>
                 <?php else: ?>
-                    <p><strong>Boutique Address:</strong> Ginza 4-2-11, Chuo-ku, Tokyo (Sweet Choice)</p>
+                    <p><strong>Boutique Café:</strong> Ginza 4-2-11, Chuo-ku, Tokyo (Sweet Choice)</p>
                 <?php endif; ?>
             </div>
 
@@ -106,7 +125,14 @@ require_once __DIR__ . '/../includes/header.php';
                 <p><strong><?= e(__('full_name', 'Name')); ?>:</strong> <?= e($order['customer_name']); ?></p>
                 <p><strong><?= e(__('email_address', 'Email')); ?>:</strong> <?= e($order['customer_email']); ?></p>
                 <p><strong><?= e(__('phone_number', 'Phone')); ?>:</strong> <?= e($order['customer_phone']); ?></p>
-                <p><strong><?= e(__('payment_section', 'Payment')); ?>:</strong> <?= ucfirst(str_replace('_', ' ', $order['payment_method'])); ?> (<?= ucfirst($order['payment_status']); ?>)</p>
+                <p>
+                    <strong><?= e(__('payment_section', 'Payment')); ?>:</strong>
+                    <?= e(formatPaymentMethodLabel($order['payment_method'], $order['payment_provider'] ?? null)); ?>
+                    (<?= ucfirst($order['payment_status']); ?>)
+                </p>
+                <?php if ($order['payment_method'] === 'online_pay' && !empty($order['payment_provider'])): ?>
+                    <p><strong><?= e(__('payment_provider', 'Payment Provider')); ?>:</strong> <?= e($order['payment_provider']); ?></p>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -171,16 +197,18 @@ require_once __DIR__ . '/../includes/header.php';
                     <span><?= formatPrice($order['customization_total']); ?></span>
                 </div>
             <?php endif; ?>
-            <?php if ($order['delivery_fee'] > 0): ?>
+            <?php if ((int)$order['service_fee'] > 0): ?>
+                <div class="summary-row">
+                    <span><?= e(__('service_fee', 'Service Fee')); ?>:</span>
+                    <span><?= formatPrice($order['service_fee']); ?></span>
+                </div>
+            <?php endif; ?>
+            <?php if ((int)$order['delivery_fee'] > 0): ?>
                 <div class="summary-row">
                     <span><?= e(__('delivery_fee', 'Delivery Fee')); ?>:</span>
                     <span><?= formatPrice($order['delivery_fee']); ?></span>
                 </div>
             <?php endif; ?>
-            <div class="summary-row">
-                <span><?= e(__('service_fee', 'Service Fee')); ?>:</span>
-                <span><?= formatPrice($order['service_fee']); ?></span>
-            </div>
             <div class="summary-row grand-total-row">
                 <span><?= e(__('grand_total', 'Grand Total')); ?>:</span>
                 <span><?= formatPrice($order['grand_total']); ?></span>

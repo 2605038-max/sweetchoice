@@ -98,8 +98,13 @@ $lowStock = $pdo->query("SELECT p.*, c.name_en AS category_name FROM products p 
                     <?php if (empty($recentOrders)): ?>
                         <tr><td colspan="6" style="text-align:center; color:var(--color-secondary-text);">No orders found.</td></tr>
                     <?php else: ?>
-                        <?php foreach ($recentOrders as $ro): 
-                            $sched = $ro['fulfillment_type'] === 'pickup' ? $ro['pickup_date'] . ' ' . $ro['pickup_time'] : $ro['delivery_date'] . ' ' . $ro['delivery_time'];
+                        <?php foreach ($recentOrders as $ro):
+                            $fType = $ro['fulfillment_type'];
+                            $sched = match($fType) {
+                                'delivery' => trim(($ro['delivery_date'] ?? '') . ' ' . ($ro['delivery_time'] ?? '')),
+                                'pickup' => trim(($ro['pickup_date'] ?? '') . ' ' . ($ro['pickup_time'] ?? '')),
+                                default => 'In-store',
+                            };
                         ?>
                             <tr>
                                 <td>
@@ -111,8 +116,8 @@ $lowStock = $pdo->query("SELECT p.*, c.name_en AS category_name FROM products p 
                                     <div style="font-size:0.75rem; color:var(--color-secondary-text);"><?= e($ro['customer_phone']); ?></div>
                                 </td>
                                 <td>
-                                    <span class="badge <?= $ro['fulfillment_type'] === 'pickup' ? 'badge-available' : 'badge-limited'; ?>">
-                                        <?= ucfirst($ro['fulfillment_type']); ?>
+                                    <span class="badge <?= $fType === 'delivery' ? 'badge-limited' : 'badge-available'; ?>">
+                                        <?= e(formatFulfillmentLabel($fType)); ?>
                                     </span>
                                     <div style="font-size:0.75rem; color:var(--color-secondary-text); margin-top:2px;"><?= e($sched); ?></div>
                                 </td>

@@ -292,18 +292,18 @@ $isSoldOut = ($product['availability'] === 'sold_out');
                                     <?php endif; ?>
                                 </div>
 
-                                <div style="display:flex; gap:6px;">
+                                <div style="display:flex; align-items:center; gap:6px;">
                                     <a href="product.php?id=<?= $paired['id']; ?>" class="btn btn-secondary btn-sm" style="padding:6px 10px; font-size:0.8rem;">
                                         <?= e(__('view_details', 'Details')); ?>
                                     </a>
-                                    <form action="cart.php" method="POST" style="margin:0;">
+                                    <form action="cart.php" method="POST" style="margin:0; display:inline-flex;">
                                         <input type="hidden" name="action" value="add">
                                         <input type="hidden" name="product_id" value="<?= $paired['id']; ?>">
                                         <input type="hidden" name="parent_product_id" value="<?= $productId; ?>">
                                         <input type="hidden" name="is_pairing" value="1">
                                         <input type="hidden" name="quantity" value="1">
                                         <button type="submit" class="btn btn-primary btn-sm" style="padding:6px 12px; font-size:0.8rem;">
-                                            <?= $paired['is_eligible_discount'] ? e(__('pairing_add_pairing', '+ Add Pairing')) : e(__('quick_add', '+ Cart')); ?>
+                                            <?= $paired['is_eligible_discount'] ? e(__('pairing_add_pairing', '+ Add Pairing')) : e(__('quick_add', 'Add')); ?>
                                         </button>
                                     </form>
                                 </div>

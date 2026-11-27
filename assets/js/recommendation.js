@@ -16,10 +16,9 @@ function initRecommendation() {
 
     // Localized text dictionary from data attributes
     const i18n = {
-        viewDetails: aiSection.dataset.langViewDetails || 'View Details',
+        viewDetails: aiSection.dataset.langViewDetails || 'Details',
         addToCart: aiSection.dataset.langAddToCart || 'Add to Cart',
         soldOut: aiSection.dataset.langSoldOut || 'Sold Out',
-        aiSommelier: aiSection.dataset.langAiSommelier || 'AI Sommelier',
         loading: aiSection.dataset.langLoading || 'Analyzing flavor profiles & pairing desserts...',
         chooseAgain: aiSection.dataset.langChooseAgain || 'Choose Again',
         noMatch: aiSection.dataset.langNoMatch || 'No desserts found matching this pairing. Try another mood or flavor!'
@@ -187,7 +186,7 @@ function initRecommendation() {
                         </h4>
                         <div class="ai-result-price">${formatPrice(item.price)}</div>
                         <div class="ai-result-reason">
-                            <strong>${escapeHtml(i18n.aiSommelier)}:</strong> "${escapeHtml(item.recommendation_reason)}"
+                            "${escapeHtml(item.recommendation_reason)}"
                         </div>
                     </div>
                     <div class="ai-result-actions">

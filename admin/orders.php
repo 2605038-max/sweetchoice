@@ -56,8 +56,10 @@ $ordersStmt->execute($params);
 $orders = $ordersStmt->fetchAll();
 ?>
 
-<?php if ($selectedOrder): 
-    $isDelivery = ($selectedOrder['fulfillment_type'] === 'delivery');
+<?php if ($selectedOrder):
+    $fType = $selectedOrder['fulfillment_type'];
+    $isDelivery = ($fType === 'delivery');
+    $isDineIn = ($fType === 'dine_in');
 ?>
     <!-- Detailed Order Receipt View -->
     <div class="admin-card" style="max-width:900px; margin:0 auto 30px auto;">
@@ -97,18 +99,25 @@ $orders = $ordersStmt->fetchAll();
                 <p><strong>Name:</strong> <?= e($selectedOrder['customer_name']); ?></p>
                 <p><strong>Email:</strong> <?= e($selectedOrder['customer_email']); ?></p>
                 <p><strong>Phone:</strong> <?= e($selectedOrder['customer_phone']); ?></p>
-                <p><strong>Payment:</strong> <?= ucfirst(str_replace('_', ' ', $selectedOrder['payment_method'])); ?> (<?= ucfirst($selectedOrder['payment_status']); ?>)</p>
+                <p><strong>Payment:</strong> <?= e(formatPaymentMethodLabel($selectedOrder['payment_method'], $selectedOrder['payment_provider'] ?? null)); ?> (<?= ucfirst($selectedOrder['payment_status']); ?>)</p>
+                <?php if ($selectedOrder['payment_method'] === 'online_pay' && !empty($selectedOrder['payment_provider'])): ?>
+                    <p><strong>Payment Provider:</strong> <?= e($selectedOrder['payment_provider']); ?></p>
+                <?php endif; ?>
             </div>
 
             <div style="background:#FFFDFD; border:1px solid var(--color-border); padding:16px; border-radius:var(--radius-sm);">
                 <h4 style="color:var(--color-deep-plum); margin-bottom:10px;">
-                    <?= $isDelivery ? ' Delivery Details' : 'Store Pickup Details'; ?>
+                    <?= $isDelivery ? '🚚 Delivery Details' : ($isDineIn ? '🍰 Dine-in (店内) Details' : '🏬 Store Pickup Details'); ?>
                 </h4>
-                <p><strong>Fulfillment Method:</strong> <?= ucfirst($selectedOrder['fulfillment_type']); ?></p>
-                <p>
-                    <strong>Scheduled Date & Time:</strong><br>
-                    <?= e($isDelivery ? $selectedOrder['delivery_date'] . ' @ ' . $selectedOrder['delivery_time'] : $selectedOrder['pickup_date'] . ' @ ' . $selectedOrder['pickup_time']); ?>
-                </p>
+                <p><strong>Fulfillment Method:</strong> <?= e(formatFulfillmentLabel($fType)); ?></p>
+                <?php if ($isDineIn): ?>
+                    <p><strong>Location:</strong> Ginza Boutique Café (In-store dining)</p>
+                <?php else: ?>
+                    <p>
+                        <strong>Scheduled Date & Time:</strong><br>
+                        <?= e($isDelivery ? $selectedOrder['delivery_date'] . ' @ ' . $selectedOrder['delivery_time'] : $selectedOrder['pickup_date'] . ' @ ' . $selectedOrder['pickup_time']); ?>
+                    </p>
+                <?php endif; ?>
                 <?php if ($isDelivery): ?>
                     <p><strong>Address:</strong> <?= e($selectedOrder['address']); ?> <?= e($selectedOrder['apartment']); ?> (〒<?= e($selectedOrder['postal_code']); ?>)</p>
                     <p><strong>Distance Tier:</strong> <?= $selectedOrder['distance_km']; ?> km</p>
@@ -181,16 +190,18 @@ $orders = $ordersStmt->fetchAll();
                     <span><?= formatPrice($selectedOrder['customization_total']); ?></span>
                 </div>
             <?php endif; ?>
-            <?php if ($selectedOrder['delivery_fee'] > 0): ?>
+            <?php if ((int)$selectedOrder['service_fee'] > 0): ?>
+                <div class="summary-row">
+                    <span>Service Fee:</span>
+                    <span><?= formatPrice($selectedOrder['service_fee']); ?></span>
+                </div>
+            <?php endif; ?>
+            <?php if ((int)$selectedOrder['delivery_fee'] > 0): ?>
                 <div class="summary-row">
                     <span>Delivery Fee:</span>
                     <span><?= formatPrice($selectedOrder['delivery_fee']); ?></span>
                 </div>
             <?php endif; ?>
-            <div class="summary-row">
-                <span>Service Fee:</span>
-                <span><?= formatPrice($selectedOrder['service_fee']); ?></span>
-            </div>
             <div class="summary-row grand-total-row">
                 <span>Grand Total:</span>
                 <span><?= formatPrice($selectedOrder['grand_total']); ?></span>
@@ -236,8 +247,13 @@ $orders = $ordersStmt->fetchAll();
                 <?php if (empty($orders)): ?>
                     <tr><td colspan="7" style="text-align:center; color:var(--color-secondary-text);">No orders found.</td></tr>
                 <?php else: ?>
-                    <?php foreach ($orders as $ord): 
-                        $sched = $ord['fulfillment_type'] === 'pickup' ? $ord['pickup_date'] . ' ' . $ord['pickup_time'] : $ord['delivery_date'] . ' ' . $ord['delivery_time'];
+                    <?php foreach ($orders as $ord):
+                        $fType = $ord['fulfillment_type'];
+                        $sched = match($fType) {
+                            'delivery' => trim(($ord['delivery_date'] ?? '') . ' ' . ($ord['delivery_time'] ?? '')),
+                            'pickup' => trim(($ord['pickup_date'] ?? '') . ' ' . ($ord['pickup_time'] ?? '')),
+                            default => 'In-store',
+                        };
                     ?>
                         <tr>
                             <td>
@@ -249,8 +265,8 @@ $orders = $ordersStmt->fetchAll();
                                 <div style="font-size:0.75rem; color:var(--color-secondary-text);"><?= e($ord['customer_phone']); ?></div>
                             </td>
                             <td>
-                                <span class="badge <?= $ord['fulfillment_type'] === 'pickup' ? 'badge-available' : 'badge-limited'; ?>">
-                                    <?= ucfirst($ord['fulfillment_type']); ?>
+                                <span class="badge <?= $fType === 'delivery' ? 'badge-limited' : 'badge-available'; ?>">
+                                    <?= e(formatFulfillmentLabel($fType)); ?>
                                 </span>
                                 <div style="font-size:0.75rem; color:var(--color-secondary-text); margin-top:2px;"><?= e($sched); ?></div>
                             </td>

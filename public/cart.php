@@ -145,8 +145,7 @@ foreach ($items as $item) {
 }
 
 $effectiveProductSubtotal = max(0, $productSubtotal - $pairingDiscountTotal);
-$serviceFee = (int)getShopSetting($pdo, 'service_fee', '150');
-$grandTotal = $effectiveProductSubtotal + $customizationTotal + $serviceFee;
+$grandTotal = $effectiveProductSubtotal + $customizationTotal;
 
 $pageTitle = __('cart_title', 'Shopping Cart');
 require_once __DIR__ . '/../includes/header.php';
@@ -289,9 +288,9 @@ require_once __DIR__ . '/../includes/header.php';
                     </div>
                 <?php endif; ?>
 
-                <div class="summary-row">
+                <div class="summary-row" style="color:var(--color-secondary-text); font-size:0.85rem;">
                     <span><?= e(__('service_fee', 'Service Fee')); ?>:</span>
-                    <span><?= formatPrice($serviceFee); ?></span>
+                    <span><?= e(__('service_fee_delivery_only', 'Local Delivery only')); ?></span>
                 </div>
 
                 <div class="summary-row" style="color:var(--color-secondary-text); font-size:0.85rem;">

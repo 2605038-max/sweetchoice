@@ -275,12 +275,12 @@ INSERT INTO business_hours (id, day_of_week, day_order, opening_time, closing_ti
 -- 12. Payment Methods
 INSERT INTO payment_methods (id, code, name_en, name_ja, description_en, description_ja, is_active) VALUES
 (1, 'credit_card', 'Credit / Debit Card', 'クレジットカード / デビットカード', 'Visa, Mastercard, JCB, American Express', 'Visa, Mastercard, JCB, Amex等対応', 1),
-(2, 'online_pay', 'Online Payment (PayPay / Line Pay)', 'オンライン決済（PayPay / LINE Pay）', 'Instant QR code or app checkout', 'QRコード・アプリでスピーディーにお支払い', 1),
-(3, 'cash_on_fulfillment', 'Cash on Pickup / Delivery', '店頭払い / 代金引換', 'Pay with cash upon receiving your sweets', '商品お受け取り時に現金でお支払い', 1);
+(2, 'online_pay', 'Online Payment', 'オンライン決済', 'PayPay, au PAY, Rakuten Pay', 'PayPay / au PAY / 楽天ペイ', 1),
+(3, 'cash', 'Cash', '現金', 'Pay with cash in store (Dine-in only)', '店内飲食時に現金でお支払いいただけます（店内飲食限定）', 1);
 
 -- 13. Shop Settings
 INSERT INTO shop_settings (setting_key, setting_value, description) VALUES
-('service_fee', '150', 'Base order handling & packaging fee in JPY'),
+('service_fee', '150', 'Service fee applied to Local Delivery orders only (in JPY)'),
 ('shop_name', 'Sweet Choice', 'Store brand name'),
 ('shop_phone', '+81 3-5555-0199', 'Customer service phone number'),
 ('shop_email', 'contact@sweetchoice.jp', 'Customer service email address'),
