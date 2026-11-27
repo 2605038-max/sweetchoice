@@ -23,7 +23,7 @@ $passwordErr = null;
 // Handle Profile Update POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
-        $profileErr = 'Session expired. Please try again.';
+        $profileErr = __('auth_csrf_expired', 'Session expired. Please refresh and try again.');
     } else {
         $action = $_POST['action'] ?? '';
 
@@ -36,13 +36,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $apt = trim($_POST['apartment'] ?? '');
 
             if (empty($name) || empty($email)) {
-                $profileErr = 'Name and email are required.';
+                $profileErr = __('account_name_email_required', 'Name and email are required.');
             } else {
                 // Check if email taken by other user
                 $chk = $pdo->prepare("SELECT id FROM users WHERE email = ? AND id != ?");
                 $chk->execute([$email, $userId]);
                 if ($chk->fetch()) {
-                    $profileErr = 'This email is already in use by another account.';
+                    $profileErr = __('account_email_in_use', 'This email is already in use by another account.');
                 } else {
                     $upd = $pdo->prepare("UPDATE users SET name = ?, email = ?, phone = ?, postal_code = ?, address = ?, apartment = ? WHERE id = ?");
                     $upd->execute([$name, $email, $phone, $postal, $addr, $apt, $userId]);
@@ -65,11 +65,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $currentHashed = $pStmt->fetchColumn();
 
             if (!password_verify($currentPass, $currentHashed)) {
-                $passwordErr = 'Current password does not match.';
+                $passwordErr = __('account_current_pass_wrong', 'Current password does not match.');
             } elseif (strlen($newPass) < 6) {
-                $passwordErr = 'New password must be at least 6 characters.';
+                $passwordErr = __('account_new_pass_min', 'New password must be at least 6 characters.');
             } elseif ($newPass !== $confirmPass) {
-                $passwordErr = 'New passwords do not match.';
+                $passwordErr = __('account_pass_mismatch', 'New passwords do not match.');
             } else {
                 $newHashed = password_hash($newPass, PASSWORD_BCRYPT);
                 $updPass = $pdo->prepare("UPDATE users SET password = ? WHERE id = ?");
@@ -102,9 +102,9 @@ require_once __DIR__ . '/../includes/header.php';
 <div class="container" style="padding: 40px 20px;">
     <div class="section-header" style="text-align:left; margin-bottom:24px;">
         <span class="section-tag"><?= e(__('nav_account', 'My Account')); ?></span>
-        <h1 class="section-title"><?= isJapanese() ? 'マイページ' : 'Hello, ' . e($user['name']); ?></h1>
+        <h1 class="section-title"><?= e(sprintf(__('account_welcome', 'Hello, %s'), $user['name'])); ?></h1>
         <p class="section-subtitle" style="margin:0;">
-            Manage your boutique preferences, saved addresses, and dessert order history.
+            <?= e(__('account_subtitle', 'Manage your boutique preferences, saved addresses, and dessert order history.')); ?>
         </p>
     </div>
 
@@ -208,17 +208,17 @@ require_once __DIR__ . '/../includes/header.php';
                 </div>
 
                 <?php if (empty($recentOrders)): ?>
-                    <p style="font-size:0.88rem; color:var(--color-secondary-text);">No past orders found.</p>
+                    <p style="font-size:0.88rem; color:var(--color-secondary-text);"><?= e(__('account_no_orders', 'No past orders found.')); ?></p>
                 <?php else: ?>
                     <div style="display:flex; flex-direction:column; gap:12px;">
                         <?php foreach ($recentOrders as $ro): ?>
                             <div style="border-bottom:1px solid var(--color-border-light); padding-bottom:10px;">
                                 <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.9rem;">
-                                    <strong><?= e($ro['order_number']); ?></strong>
+                                    <a href="order-confirmation.php?order=<?= urlencode($ro['order_number']); ?>" style="font-weight:700; color:var(--color-deep-text);"><?= e($ro['order_number']); ?></a>
                                     <?= renderOrderStatusBadge($ro['status']); ?>
                                 </div>
                                 <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.82rem; color:var(--color-secondary-text); margin-top:4px;">
-                                    <span><?= date('Y/m/d', strtotime($ro['created_at'])); ?> &bull; <?= ucfirst($ro['fulfillment_type']); ?></span>
+                                    <span><?= date('Y/m/d', strtotime($ro['created_at'])); ?> &bull; <?= e(formatFulfillmentLabel($ro['fulfillment_type'])); ?></span>
                                     <span style="font-weight:700; color:var(--color-deep-plum);"><?= formatPrice($ro['grand_total']); ?></span>
                                 </div>
                             </div>
@@ -235,7 +235,7 @@ require_once __DIR__ . '/../includes/header.php';
                 </div>
 
                 <?php if (empty($favoriteProducts)): ?>
-                    <p style="font-size:0.88rem; color:var(--color-secondary-text);">No saved favorites yet.</p>
+                    <p style="font-size:0.88rem; color:var(--color-secondary-text);"><?= e(__('account_no_favorites', 'No saved favorites yet.')); ?></p>
                 <?php else: ?>
                     <div style="display:flex; flex-direction:column; gap:10px;">
                         <?php foreach ($favoriteProducts as $favP): ?>

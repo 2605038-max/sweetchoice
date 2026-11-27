@@ -336,6 +336,60 @@ function handleImageUpload(array $file, string $targetDir, string $prefix = 'img
     return ['success' => true, 'filename' => $newFilename, 'error' => null];
 }
 
+/**
+ * Return allowed payment method codes for a given fulfillment type.
+ * - Dine-in: credit_card, online_pay, cash
+ * - Store Pickup: credit_card, online_pay
+ * - Local Delivery: credit_card, online_pay
+ */
+function getAllowedPaymentMethodsForFulfillment(string $fulfillment): array {
+    return match ($fulfillment) {
+        'dine_in'  => ['credit_card', 'online_pay', 'cash'],
+        'pickup'   => ['credit_card', 'online_pay'],
+        'delivery' => ['credit_card', 'online_pay'],
+        default    => [],
+    };
+}
+
+/**
+ * Return supported Online Payment providers and their demonstration info labels.
+ */
+function getOnlinePaymentProviders(): array {
+    return [
+        'PayPay'      => 'PayPay: Demo Payment Information',
+        'au PAY'      => 'au PAY: Demo Payment Information',
+        'Rakuten Pay' => 'Rakuten Pay: Demo Payment Information',
+    ];
+}
+
+/**
+ * Return localized display label for a fulfillment type.
+ */
+function formatFulfillmentLabel(string $fulfillment): string {
+    return match ($fulfillment) {
+        'dine_in'  => __('dine_in_option', 'Dine-in (店内)'),
+        'pickup'   => __('pickup_option', 'Store Pickup'),
+        'delivery' => __('delivery_option', 'Local Delivery'),
+        default    => ucfirst(str_replace('_', ' ', $fulfillment)),
+    };
+}
+
+/**
+ * Return localized display label for a payment method and optional provider.
+ */
+function formatPaymentMethodLabel(string $method, ?string $provider = null): string {
+    $base = match ($method) {
+        'credit_card' => isJapanese() ? 'クレジットカード / デビットカード' : 'Credit / Debit Card',
+        'online_pay'  => isJapanese() ? 'オンライン決済' : 'Online Payment',
+        'cash', 'cash_on_fulfillment' => isJapanese() ? '現金' : 'Cash',
+        default => ucfirst(str_replace('_', ' ', $method)),
+    };
+    if ($method === 'online_pay' && !empty($provider)) {
+        return $base . ' (' . $provider . ')';
+    }
+    return $base;
+}
+
 // Product Pairing & Inventory-Based Discount System
 require_once __DIR__ . '/pairings.php';
 

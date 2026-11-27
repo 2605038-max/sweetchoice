@@ -18,7 +18,7 @@ $currentLang = getCurrentLang();
         <a href="index.php" class="brand-wrapper">
             <div class="brand-identity">
                 <span class="brand-text">SWEET CHOICE</span>
-                <span class="brand-subtext">ATELIER GINZA</span>
+                
             </div>
         </a>
 
@@ -43,7 +43,7 @@ $currentLang = getCurrentLang();
             </li>
             <!-- Mini Game Navigation Item(new) -->
             <li class="nav-item">
-                <a href="game/index.html" class="nav-game-link" title="<?= isJapanese() ? '走るケーキゲームで遊ぶ' : 'Play Running Cake Game'; ?>">
+                <a href="game/index.html?lang=<?= e($currentLang); ?>" class="nav-game-link" title="<?= isJapanese() ? '走るケーキゲームで遊ぶ' : 'Play Running Cake Game'; ?>">
                     <span style="margin-right: 4px;">🎮</span><?= isJapanese() ? 'ミニゲーム' : 'Mini Game'; ?>
                 </a>
             </li>
