@@ -130,7 +130,7 @@ $shopHoursDisplay = getShopSetting($pdo, 'business_hours_display', 'Mon - Sun: 1
             <div class="form-group">
                 <label class="form-label">Service Fee (Japanese Yen ¥ / JPY) *</label>
                 <input type="number" name="service_fee" class="form-control" min="0" value="<?= e($serviceFee); ?>" required>
-                <div style="font-size:0.75rem; color:var(--color-secondary-text); margin-top:4px;">Packaging & handling fee applied to each order.</div>
+                <div style="font-size:0.75rem; color:var(--color-secondary-text); margin-top:4px;">Service fee applied to Local Delivery orders only (never charged for Dine-in or Store Pickup).</div>
             </div>
 
             <div class="form-group">

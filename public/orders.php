@@ -60,9 +60,13 @@ require_once __DIR__ . '/../includes/header.php';
             </div>
         <?php else: ?>
             <div style="display:flex; flex-direction:column; gap:20px;">
-                <?php foreach ($orders as $ord): 
-                    $isDelivery = ($ord['fulfillment_type'] === 'delivery');
-                    $scheduled = $isDelivery ? $ord['delivery_date'] . ' ' . $ord['delivery_time'] : $ord['pickup_date'] . ' ' . $ord['pickup_time'];
+                <?php foreach ($orders as $ord):
+                    $fType = $ord['fulfillment_type'];
+                    $scheduled = match($fType) {
+                        'delivery' => trim(($ord['delivery_date'] ?? '') . ' ' . ($ord['delivery_time'] ?? '')),
+                        'pickup' => trim(($ord['pickup_date'] ?? '') . ' ' . ($ord['pickup_time'] ?? '')),
+                        default => isJapanese() ? '銀座店カフェ' : 'Ginza Boutique Café',
+                    };
                 ?>
                     <div style="background:#FFFFFF; border:1px solid var(--color-border); border-radius:var(--radius-md); padding:24px; box-shadow:var(--shadow-sm); display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:16px;">
                         <div>
@@ -71,9 +75,9 @@ require_once __DIR__ . '/../includes/header.php';
                                 <?= renderOrderStatusBadge($ord['status']); ?>
                             </div>
                             <div style="font-size:0.88rem; color:var(--color-secondary-text);">
-                                <?= date('Y/m/d H:i', strtotime($ord['created_at'])); ?> &bull; 
-                                <span><?= $isDelivery ? ' ' . e(__('delivery_option', 'Delivery')) : ' ' . e(__('pickup_option', 'Store Pickup')); ?></span> &bull; 
-                                <span> <?= e($scheduled); ?></span>
+                                <?= date('Y/m/d H:i', strtotime($ord['created_at'])); ?> &bull;
+                                <span><?= e(formatFulfillmentLabel($fType)); ?></span> &bull;
+                                <span><?= e($scheduled); ?></span>
                             </div>
                         </div>
 

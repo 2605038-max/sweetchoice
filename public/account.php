@@ -218,7 +218,7 @@ require_once __DIR__ . '/../includes/header.php';
                                     <?= renderOrderStatusBadge($ro['status']); ?>
                                 </div>
                                 <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.82rem; color:var(--color-secondary-text); margin-top:4px;">
-                                    <span><?= date('Y/m/d', strtotime($ro['created_at'])); ?> &bull; <?= ucfirst($ro['fulfillment_type']); ?></span>
+                                    <span><?= date('Y/m/d', strtotime($ro['created_at'])); ?> &bull; <?= e(formatFulfillmentLabel($ro['fulfillment_type'])); ?></span>
                                     <span style="font-weight:700; color:var(--color-deep-plum);"><?= formatPrice($ro['grand_total']); ?></span>
                                 </div>
                             </div>
