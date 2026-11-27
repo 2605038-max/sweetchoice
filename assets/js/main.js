@@ -4,6 +4,14 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+    // 0. Sync active website language to localStorage for cross-tab Mini Game updates
+    try {
+        const docLang = document.documentElement.getAttribute('lang');
+        if (docLang === 'en' || docLang === 'ja') {
+            localStorage.setItem('sweetchoice_lang', docLang);
+        }
+    } catch (e) {}
+
     // 1. Mobile Menu Toggle
     const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
     const navLinks = document.querySelector('.nav-links');

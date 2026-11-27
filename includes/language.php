@@ -36,6 +36,11 @@ if (empty($_SESSION['lang_chosen'])) {
     $_SESSION['lang'] = 'ja';
 }
 
+// Keep browser cookie aligned with explicitly chosen session language so static pages (e.g. Mini Game) detect it automatically
+if (!headers_sent() && !empty($_SESSION['lang_chosen']) && ($_COOKIE['sweetchoice_lang'] ?? '') !== $_SESSION['lang']) {
+    setcookie('sweetchoice_lang', $_SESSION['lang'], time() + (86400 * 30), '/');
+}
+
 /**
  * Get current active language code ('en' or 'ja')
  */
